@@ -3,7 +3,6 @@
 #include "stdafx.h"
 #include "Items.h"
 
-using namespace Dix;
 
 
 bool LifeExtend::Draw(void)
@@ -13,8 +12,8 @@ bool LifeExtend::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_LIFE_EXTEND], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_LIFE_EXTEND], true);
 	return true;
 }
 
@@ -36,8 +35,8 @@ bool Barrier::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_BARRIER], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_BARRIER], true);
 	return true;
 }
 
@@ -59,8 +58,8 @@ bool Quick::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_QUICK], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_QUICK], true);
 	return true;
 }
 
@@ -68,7 +67,7 @@ bool Quick::Touch(Snowman *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(IsTouchRectAndRect(touch_rect + pos, other_rect)){
-		other->SetSpeed(600.0f);
+		other->SetSpeed(600.0);
 		Clear();
 		return true;
 	}
@@ -82,8 +81,8 @@ bool TriBullets::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_TRI_BULLETS], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_TRI_BULLETS], true);
 	return true;
 }
 
@@ -91,7 +90,7 @@ bool TriBullets::Touch(Snowman *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(IsTouchRectAndRect(touch_rect + pos, other_rect)){
-		other->SetBulletType(BULLETTYPE::TRIBULLETS);
+		other->SetBulletType(TRIBULLETS);
 		Clear();
 		return true;
 	}
@@ -105,8 +104,8 @@ bool Eliminator::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_ELIMINATOR], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_ELIMINATOR], true);
 	return true;
 }
 
@@ -114,7 +113,7 @@ bool Eliminator::Touch(Snowman *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(IsTouchRectAndRect(touch_rect + pos, other_rect)){
-		sp<ScoreObj> sp_dummy(new ScoreObj(50, SCORE_HALF));
+		Dix::sp<ScoreObj> sp_dummy(new ScoreObj(50, SCORE_HALF));
 		Score::Instance().AddObj(sp_dummy, true);		//ダミーのオブジェクトをセット
 		Clear();
 		return true;
@@ -129,8 +128,8 @@ bool Multiplier::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_MULTIPLIER], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_MULTIPLIER], true);
 	return true;
 }
 
@@ -152,8 +151,8 @@ bool GravifiedBullet::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_GRAVIFIED], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ITEM_GRAVIFIED], true);
 	return true;
 }
 
@@ -161,7 +160,7 @@ bool GravifiedBullet::Touch(Snowman *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(IsTouchRectAndRect(touch_rect + pos, other_rect)){
-		other->SetBulletType(BULLETTYPE::GRAVIFIED);
+		other->SetBulletType(GRAVIFIED);
 		Clear();
 		return true;
 	}
@@ -183,8 +182,8 @@ bool EliminatorX::Draw(void)
 		SetVector(HAZAMA::V2Get(0, 0));			//静止させる
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_pic_handle, true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_pic_handle, true);
 	return true;
 }
 
@@ -192,7 +191,7 @@ bool EliminatorX::Touch(Snowman *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(!destruct_flag && IsTouchRectAndRotatedRect(other_rect, rect + pos)){
-		sp<ScoreObj> sp_dummy(new ScoreObj(50, SCORE_QAURTER_HALF));
+		Dix::sp<ScoreObj> sp_dummy(new ScoreObj(50, SCORE_QAURTER_HALF));
 		Score::Instance().AddObj(sp_dummy, true);		//ダミーのオブジェクトをセット
 		other->BarrierOff(true);
 		Clear();

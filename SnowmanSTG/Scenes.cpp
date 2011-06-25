@@ -7,67 +7,67 @@
 #include "InputDevice.h"
 
 
-CSceneTitle::CSceneTitle(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key)
+SceneTitle::SceneTitle(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key)
 {
 	sp_task_system = sp_task;
 	sp_input_key = sp_key;
 	sp_parent = sp_paren;
 }
 
-void CSceneTitle::Begin(void)
+void SceneTitle::Begin(void)
 {
-	Dix::sp<CTitleObj> sp_title;
-	CMyFactory<CTitleObj>::Instance().Create(0, sp_title);
+	Dix::sp<TitleObj> sp_title;
+	MyFactory<TitleObj>::Instance().Create(0, sp_title);
 
 	while(sp_input_key->Update(this, sp_title.GetPtr())){
 		sp_task_system->Update();
-		if(ProcessMessage() == -1){
+		if(!HAZAMA::draw_helper->ProcessMessage()){
 			return;
 		}
 	}
-	SetDrawScreen(DX_SCREEN_BACK);
-	ClearDrawScreen();
-	DrawString(200, 220, "‚Æ‚É‚©‚­¶‚«‰„‚Ñ‚ë...", GetColor(255, 255, 255));
-	ScreenFlip();
+	HAZAMA::draw_helper->SetDrawScreen(HAZAMA::DrawHelper::BACK);
+	HAZAMA::draw_helper->InitializeScreen();
+	HAZAMA::draw_helper->DrawString(200, 220, "‚Æ‚É‚©‚­¶‚«‰„‚Ñ‚ë...", HAZAMA::draw_helper->GetColorCode(255, 255, 255));
+	HAZAMA::draw_helper->FlipScreen();
 	sp_title->Clear();
-	WaitTimer(3000);
-	CTimerForGames::Instance().Stop(true);
-	Dix::sp<CSceneGaming> sp_gaming(new CSceneGaming(sp_parent, sp_task_system, sp_input_key));
+	HAZAMA::draw_helper->WaitTimer(3000);
+	TimerForGames::Instance().Stop(true);
+	Dix::sp<SceneGaming> sp_gaming(new SceneGaming(sp_parent, sp_task_system, sp_input_key));
 	sp_parent->AddScene(sp_gaming);
 	active_flag = false;
 }
 
-void CSceneTitle::CMenuStartGame::Execute(void)
+void SceneTitle::MenuStartGame::Execute(void)
 {
 	p_title->sp_task_system->SetReplayMode(false);
 }
 
-void CSceneTitle::CMenuReplayGame::Execute(void)
+void SceneTitle::MenuReplayGame::Execute(void)
 {
 	p_title->sp_task_system->SetReplayMode(true);
 }
 
-void CSceneTitle::Invoke(MENUS &menu)
+void SceneTitle::Invoke(MENUS &menu)
 {
 	switch(menu){
 		case START_GAME:
-			p_menu = new CMenuStartGame(this);
+			p_menu = new MenuStartGame(this);
 			break;
 		case REPLAY_GAME:
-			p_menu = new CMenuReplayGame(this);
+			p_menu = new MenuReplayGame(this);
 			break;
 	}
 
 	p_menu->Execute();
 }
 
-CSceneGaming::CSceneGaming(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key)
+SceneGaming::SceneGaming(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key)
 {
 	sp_task_system = sp_task;
 	sp_input_key = sp_key;
-	CSnowmanTask *snowman_task = sp_task_system->GetTask<CSnowmanTask>(TASK_SNOWMAN);
+	SnowmanTask *snowman_task = sp_task_system->GetTask<SnowmanTask>(TASK_SNOWMAN);
 	sp_input_key->SetSnowmanTask(snowman_task);
-	CMyFactory<CBackObj>::Instance().Create(0, sp_back);
+	MyFactory<BackObj>::Instance().Create(0, sp_back);
 	Score *p_score = &Score::Instance();
 	sp_task_system->Init();
 	sp_task_system->SwitchTask(TASK_SNOWMAN);
@@ -78,14 +78,14 @@ CSceneGaming::CSceneGaming(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard 
 	sp_task_system->SwitchTask(TASK_TOUCH);
 	sp_task_system->SwitchTask(TASK_SCORE);
 	sp_task_system->SwitchTask(TASK_REPLAY);
-	CDrawTask *p_draw_task = sp_task_system->GetTask<CDrawTask>(TASK_DRAW);
+	DrawTask *p_draw_task = sp_task_system->GetTask<DrawTask>(TASK_DRAW);
 	sp_score.SetPtr(p_score);
-	Dix::sp<CDrawObj> sp_draw = sp_score;
+	Dix::sp<DrawObj> sp_draw = sp_score;
 	p_draw_task->Register(sp_draw);
 	sp_parent = sp_paren;
 }
 
-void CSceneGaming::Begin(void)
+void SceneGaming::Begin(void)
 {
 	while(1){
 		MainBGM::Play();	//BGM‚ÌÄ¶
@@ -93,58 +93,58 @@ void CSceneGaming::Begin(void)
 			break;		//‘±s‹ÖŽ~‚Ì‡}‚ª‚ ‚Á‚½‚çAƒXƒRƒA‰æ–Ê‚Ö
 		}
 
-		CFactoryManager::Instance().Optimize();
-		if(ProcessMessage() == -1){
+		FactoryManager::Instance().Optimize();
+		if(!HAZAMA::draw_helper->ProcessMessage()){
 			return;
 		}
 	}
-	Dix::sp<CSceneScore> sp_scene_score(new CSceneScore(sp_parent, sp_task_system, sp_input_key));
+	Dix::sp<SceneScore> sp_scene_score(new SceneScore(sp_parent, sp_task_system, sp_input_key));
 	sp_parent->AddScene(sp_scene_score);
 	MainBGM::Stop();		//BGM‚Ì’âŽ~
-	CTimerForGames::Instance().Stop(true);
+	TimerForGames::Instance().Stop(true);
 	active_flag = false;
 }
 
-CSceneScore::CSceneScore(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key)
+SceneScore::SceneScore(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key)
 {
 	sp_task_system = sp_task;
 	sp_input_key = sp_key;
-	white = GetColor(255, 255, 255);
+	white = HAZAMA::draw_helper->GetColorCode(255, 255, 255);
 	sp_parent = sp_paren;
 }
 
-void CSceneScore::Begin(void)
+void SceneScore::Begin(void)
 {
 	const char CONTINUE_SUGGESTION[] = "Press c to try it AGAIN!";
 	const char QUIT_SUGGESTION[] = "Press q to quit the game!";
 
 	while(1){
-		SetDrawScreen(DX_SCREEN_BACK);
-		ClearDrawScreen();
+		HAZAMA::draw_helper->SetDrawScreen(HAZAMA::DrawHelper::BACK);
+		HAZAMA::draw_helper->InitializeScreen();
 		ScoreRanking();
-		DrawString(200, 400, CONTINUE_SUGGESTION, white);
-		DrawString(200, 430, QUIT_SUGGESTION, white);
-		ScreenFlip();
+		HAZAMA::draw_helper->DrawString(200, 400, CONTINUE_SUGGESTION, white);
+		HAZAMA::draw_helper->DrawString(200, 430, QUIT_SUGGESTION, white);
+		HAZAMA::draw_helper->FlipScreen();
 
-		if(ProcessMessage() == -1){
+		if(!HAZAMA::draw_helper->ProcessMessage()){
 			return;
 		}
 
-		WaitKey();
-		if(CheckHitKey(KEY_INPUT_C) == 1){
+		HAZAMA::draw_helper->WaitForKey();
+		if(HAZAMA::draw_helper->IsKeyPressedWith(HAZAMA::DrawHelper::KEY_C)){
 			sp_task_system->Reset();
-			CFactoryManager::Instance().ClearAll();
+			FactoryManager::Instance().ClearAll();
 			sp_parent->RemoveScenes();
-			Dix::sp<CSceneGaming> sp_gaming(new CSceneGaming(sp_parent, sp_task_system, sp_input_key));
+			Dix::sp<SceneGaming> sp_gaming(new SceneGaming(sp_parent, sp_task_system, sp_input_key));
 			sp_parent->AddScene(sp_gaming);
 			break;
-		}else if(CheckHitKey(KEY_INPUT_Q) == 1){
+		}else if(HAZAMA::draw_helper->IsKeyPressedWith(HAZAMA::DrawHelper::KEY_Q)){
 			break;
 		}
 	}
 }
 
-void CSceneScore::ScoreRanking(void)
+void SceneScore::ScoreRanking(void)
 {
 	Score *p_score = &Score::Instance();
 	p_score->ReadFile();

@@ -6,14 +6,14 @@
 
 
 
-Zetsubou::Zetsubou() : CMyDrawObj(1), AMOUNT_FOE_MOVE(300.0f), launched_bullets(0)
+Zetsubou::Zetsubou() : MyDrawObj(1), AMOUNT_FOE_MOVE(300.0), launched_bullets(0)
 {
-	float rand = static_cast<float>(GetRand(MAX_INITIAL_POS_Y));
+	const double RAND = static_cast<double>(HAZAMA::draw_helper->GetRand(MAX_INITIAL_POS_Y));
 	speed = AMOUNT_FOE_MOVE;
-	pos(INITIAL_FOE_POSITION, rand);
-	vect(-1.0f * speed, 0);
-	rect(0, 0, 48.0f, 64.0f);
-	touch_rect(0, 0, 48.0f, 64.0f);
+	pos(INITIAL_FOE_POSITION, RAND);
+	vect(-1.0 * speed, 0);
+	rect(0, 0, 48.0, 64.0);
+	touch_rect(0, 0, 48.0, 64.0);
 }
 
 bool Zetsubou::Draw(void)
@@ -23,8 +23,8 @@ bool Zetsubou::Draw(void)
 		return true;
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ZETSUBOU], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[ZETSUBOU], true);
 	return true;
 }
 
@@ -50,7 +50,7 @@ bool Zetsubou::Touch(SelfBullet *other)
 	return true;
 }
 
-bool Zetsubou::Touch(CExploAnim *other)
+bool Zetsubou::Touch(ExploAnim *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(IsTouchRectAndRect(touch_rect + pos, other_rect)){

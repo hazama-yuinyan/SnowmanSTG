@@ -5,10 +5,9 @@
 #ifndef _FACTORY_H
 #define _FACTORY_H
 
-using namespace std;
 
 typedef size_t OBJID;	// オブジェクトID
-class CDrawTask;
+class DrawTask;
 
 
 /**
@@ -29,7 +28,7 @@ public:
 /**
 * ファクトリマネージャ基本クラス
 */
-class CFactoryManager
+class FactoryManager
 {
 protected:
 	/**
@@ -37,16 +36,16 @@ protected:
 	*（これは使用したファクトリクラス内で
 	*　自動登録されていきます）
 	*/
-	static list<IObjectFactory*> m_pFactoryList;
+	static std::list<IObjectFactory*> m_pFactoryList;
 
 protected:
 	// コンストラクタ
 	// このクラスは外部生成を禁止しますので
 	// プロテクト宣言します
-	CFactoryManager(){}
+	FactoryManager(){}
 
 public:
-	virtual ~CFactoryManager()
+	virtual ~FactoryManager()
 	{
 	}
 
@@ -54,9 +53,9 @@ public:
 	/**
 	* オブジェクト生成メソッド（シングルトン）
 	*/
-	static CFactoryManager &Instance(void)
+	static FactoryManager &Instance(void)
 	{
-		static CFactoryManager inst;	// static宣言で1つだけ存在できる事を保証
+		static FactoryManager inst;	// static宣言で1つだけ存在できる事を保証
 		return inst;
 	}
 
@@ -74,7 +73,7 @@ public:
 	*/
 	virtual bool Optimize(void)
 	{
-		list<IObjectFactory*>::iterator it;
+		std::list<IObjectFactory*>::iterator it;
 		for(it=m_pFactoryList.begin(); it!=m_pFactoryList.end();it++)
 			(*it)->Optimize();
 		return true;
@@ -84,7 +83,7 @@ public:
 	* 全ファクトリにクリア命令を出す
 	*/
 	virtual void ClearAll(void){
-		list<IObjectFactory*>::iterator it;
+		std::list<IObjectFactory*>::iterator it;
 		for(it=m_pFactoryList.begin(); it!=m_pFactoryList.end();it++)
 			(*it)->ClearAll();
 	}
@@ -97,20 +96,20 @@ public:
 * オブジェクトファクトリ基本クラス
 * (独自拡張）
 */
-class CMyObjectFactory : public IObjectFactory
+class MyObjectFactory : public IObjectFactory
 {
 protected:
-	static CDrawTask *p_draw_task;
+	static DrawTask *p_draw_task;
 	
-	CMyObjectFactory()
+	MyObjectFactory()
 	{
 		// この基本クラスでファクトリマネージャに自身を登録します
 		// これは派生クラスをシングルトンで実装する事を想定しています
-		CFactoryManager::Instance().RegistFactory(this);
+		FactoryManager::Instance().RegistFactory(this);
 	}
 
 public:
-	static void SetDrawTask(CDrawTask *p){
+	static void SetDrawTask(DrawTask *p){
 		p_draw_task = p;
 	}
 };
@@ -121,26 +120,26 @@ public:
 * （独自拡張）
 */
 template <class T>
-class CMyFactory : public CMyObjectFactory
+class MyFactory : public MyObjectFactory
 {
 	typedef Dix::sp<T> OBJ;
 
-	vector<OBJ> v_obj;	// オブジェクト格納ベクターコンテナ
+	std::vector<OBJ> v_obj;	// オブジェクト格納ベクターコンテナ
 
 protected:
 	// シングルトンなのでコンストラクタをプロトタイプ宣言します
-	CMyFactory(){};
+	MyFactory(){};
 
 public:
-	virtual ~CMyFactory(){};
+	virtual ~MyFactory(){};
 
 public:
 	/**
 	* シングルトンオブジェクトを取得
 	*/
-	static CMyFactory<T> &Instance(void)
+	static MyFactory<T> &Instance(void)
 	{
-		static CMyFactory<T> inst;
+		static MyFactory<T> inst;
 		return inst;
 	}
 
@@ -171,7 +170,7 @@ public:
 	*/
 	bool Optimize(void){
 	// 参照カウントが1のオブジェクトは取り除く
-		v_obj.erase(remove_if(v_obj.begin(), v_obj.end(), boost::mem_fn(&Dix::sp<T>::IsErased)), v_obj.end());
+		v_obj.erase(std::remove_if(v_obj.begin(), v_obj.end(), boost::bind(&HAZAMA::IsErased<T>, _1)), v_obj.end());
 		return true;
 	}
 
@@ -194,7 +193,7 @@ public:
 
 		if(Num < Size()){		//指定された要素番号のオブジェクトがある場合
 			Create(Num, sp_obj);
-			if(!sp_obj->IsNotDraw()){	//画面に描画されないものは弾く
+			if(!sp_obj->IsNotDrawn()){	//画面に描画されないものは弾く
 				SPOut = sp_obj;
 				return true;
 			}

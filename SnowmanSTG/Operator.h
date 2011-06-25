@@ -16,12 +16,12 @@ public:
 /**
 * 移動関連のオペレーター基底クラス
 */
-class CMoveOperator : public IOperator
+class MoveOperator : public IOperator
 {
 protected:
 	HAZAMA::VECTOR2 pos;
 	HAZAMA::VECTOR2 vect;
-	float speed;
+	double speed;
 
 	//以下、必要なときのみセットする変数群
 	HAZAMA::RECT self_rect;			//自身の四角形の相対座標
@@ -57,7 +57,7 @@ public:
 	/**
 	* オブジェクトの既定速度を間借りする
 	*/
-	void SetSpeed(const float &Speed){
+	void SetSpeed(const double Speed){
 		speed = Speed;
 	}
 
@@ -65,7 +65,7 @@ public:
 	* 過剰に加速しないように検査して訂正する
 	* @param Const 基準となるスピード
 	*/
-	void AdjustVector(const float &Const){
+	void AdjustVector(const double Const){
 		if(vect.x > Const){
 			vect(Const, vect.y);
 		}
@@ -100,13 +100,13 @@ public:
 /**
 * 現在の移動方向にまっすぐにオブジェクトを動かす
 */
-class COperatorStraight : public CMoveOperator
+class OperatorStraight : public MoveOperator
 {
 private:
-	CTimerForGames *p_timer;
+	TimerForGames *p_timer;
 	
 public:
-	COperatorStraight(void);
+	OperatorStraight(void);
 	
 	/**
 	* 移動方向と速さに従って現在地を変化させる
@@ -117,10 +117,10 @@ public:
 /**
 * 左に動くよう仕向ける
 */
-class COperatorGoLeft : public CMoveOperator
+class OperatorGoLeft : public MoveOperator
 {
 public:
-	COperatorGoLeft(void){};
+	OperatorGoLeft(void){};
 	void Operate(void){
 		vect.x += -1.0f * speed;
 		AdjustVector(speed);
@@ -130,10 +130,10 @@ public:
 /**
 * 上に動くよう仕向ける
 */
-class COperatorGoUp : public CMoveOperator
+class OperatorGoUp : public MoveOperator
 {
 public:
-	COperatorGoUp(void){};
+	OperatorGoUp(void){};
 	void Operate(void){
 		vect.y += -1.0f * speed;
 		AdjustVector(speed);
@@ -143,10 +143,10 @@ public:
 /**
 * 右に動くよう仕向ける
 */
-class COperatorGoRight : public CMoveOperator
+class OperatorGoRight : public MoveOperator
 {
 public:
-	COperatorGoRight(void){};
+	OperatorGoRight(void){};
 	void Operate(void){
 		vect.x += 1.0f * speed;
 		AdjustVector(speed);
@@ -156,10 +156,10 @@ public:
 /**
 * 下に動くよう仕向ける
 */
-class COperatorGoDown : public CMoveOperator
+class OperatorGoDown : public MoveOperator
 {
 public:
-	COperatorGoDown(void){};
+	OperatorGoDown(void){};
 	void Operate(void){
 		vect.y += 1.0f * speed;
 		AdjustVector(speed);
@@ -169,7 +169,7 @@ public:
 /**
 * ほかのオブジェクトを追いかけるような挙動を実現するクラス
 */
-class COperatorChaseAfter : public CMoveOperator
+class OperatorChaseAfter : public MoveOperator
 {
 private:
 	/**
@@ -180,22 +180,22 @@ private:
 	HAZAMA::VECTOR2 FigureTargetDirection(HAZAMA::VECTOR2 &Vect);
 
 public:
-	COperatorChaseAfter(void){};
+	OperatorChaseAfter(void){};
 	void Operate(void);
 };
 
 /**
 * 重力を受けて下向きに加速する挙動を実現するクラス
 */
-class COperatorApplyGravity : public CMoveOperator
+class OperatorApplyGravity : public MoveOperator
 {
 private:
 	const float AMOUNT_GRAVITY;		//重力の大きさ(単位はpixels/x)
-	CTimerForGames *p_timer;
+	TimerForGames *p_timer;
 
 public:
-	COperatorApplyGravity(float g = 294.0f) : AMOUNT_GRAVITY(g){
-		p_timer = &CTimerForGames::Instance();
+	OperatorApplyGravity(float g = 294.0f) : AMOUNT_GRAVITY(g){
+		p_timer = &TimerForGames::Instance();
 	}
 	void Operate(void);
 };

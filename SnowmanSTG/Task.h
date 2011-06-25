@@ -13,21 +13,33 @@
 #include "AnimObj.h"
 #include "Items.h"
 
-class CInputDeviceKeyBoard;
+class InputDeviceKeyBoard;
 
 enum TASKIDS{TASK_SNOWMAN, TASK_ZETSUBOU, TASK_SELFBULLET, TASK_FOEBULLET, TASK_ITEM, TASK_TOUCH, TASK_SCORE
 , TASK_DRAW, TASK_REPLAY};
 
 enum TASK_MESSAGES{NONE, DONT_MOVE, CAN_MOVE, ELIMINATING, ADD_OPE_APPLYGRAVITY, REMOVE_EXTRA_OPE, ENDING_GAME};
 
+template<class T>
+bool operator<(const Dix::sp<T> &lhs, const Dix::sp<T> &rhs)
+{
+	return(*lhs.GetPtr() < *rhs.GetPtr());
+}
 
-class CTaskBase : public ITaskBase
+template<class T>
+bool operator>(const Dix::sp<T> &lhs, const Dix::sp<T> &rhs)
+{
+	return(*lhs.GetPtr() > *rhs.GetPtr());
+}
+
+
+class TaskBase : public ITaskBase
 {
 protected:
 	TASK_MESSAGES message;
 
 public:
-	CTaskBase(void) : message(NONE){};
+	TaskBase(void) : message(NONE){};
 	TASK_MESSAGES GetTaskMessage(void){return message;}
 	void ResetMessage(void){message = NONE;}
 };
@@ -35,7 +47,7 @@ public:
 /**
 * タスクを管理する
 */
-class CTaskSystem : public ITaskSystem
+class TaskSystem : public ITaskSystem
 {
 private:
 	bool continue_flag;		//!< @brief Updateの戻り値として使用する変数
@@ -54,8 +66,8 @@ public:
 	* コンストラクタ
 	* 移動オペレーターを含むタスクはここで生成する
 	*/
-	CTaskSystem(CInputDeviceKeyBoard *p_key);
-	virtual ~CTaskSystem(){};
+	TaskSystem(InputDeviceKeyBoard *p_key);
+	virtual ~TaskSystem(){};
 
 	/**
 	* タスク全体を初期化する
@@ -90,7 +102,7 @@ public:
 	TASK_MESSAGES GetTaskMessage(TASKIDS TaskID){
 		TASK_MAP::iterator it = m_mapActTask.find(TaskID);
 		if(it != m_mapActTask.end()){
-			Dix::sp<CTaskBase> sp_task;
+			Dix::sp<TaskBase> sp_task;
 			sp_task.DownCast((*it).second);
 			return sp_task->GetTaskMessage();
 		}
@@ -102,7 +114,7 @@ public:
 	*/
 	void ResetMessage(TASKIDS TaskID){
 		TASK_MAP::iterator it = m_mapActTask.find(TaskID);
-		Dix::sp<CTaskBase> sp_task;
+		Dix::sp<TaskBase> sp_task;
 		sp_task.DownCast((*it).second);
 		sp_task->ResetMessage();
 	}
@@ -120,10 +132,10 @@ public:
 * 描画タスククラス
 * 描画を担当する
 */
-class CDrawTask : public CTaskBase
+class DrawTask : public TaskBase
 {
 private:
-	typedef Dix::sp<CDrawObj> SPDrawObj;
+	typedef Dix::sp<DrawObj> SPDrawObj;
 	std::list<SPDrawObj> l_sp_draw_obj;		//!< @brief 描画オブジェクトクラス
 	std::list<SPDrawObj> l_have_msgs_obj;	//!< @brief メッセージを発したいオブジェクトリスト
 
@@ -131,14 +143,14 @@ public:
 	/**
 	* コンストラクタ
 	*/
-	CDrawTask(){
+	DrawTask(){
 		InittheList();
 	}
 
 	/**
 	* デストラクタ
 	*/
-	virtual ~CDrawTask(){
+	virtual ~DrawTask(){
 		Reset();
 	};
 
@@ -153,7 +165,7 @@ public:
 	void InittheList(void);
 
 	void EraseDummies(void){
-		l_have_msgs_obj.remove_if(boost::bind(&CDrawTask::IsDummy, this, _1));
+		l_have_msgs_obj.remove_if(boost::bind(&DrawTask::IsDummy, this, _1));
 	}
 
 	bool IsDummy(SPDrawObj &sp){return(sp.GetPtr() == NULL);}
@@ -185,7 +197,7 @@ public:
 /**
 * オペレーターを使用するタスクの基底クラス
 */
-class COperatorTask : public CTaskBase
+class OperatorTask : public TaskBase
 {
 protected:
 	std::vector<Dix::sp<IOperator> > v_sp_ope;	//動かす人インターフェイス
@@ -194,13 +206,13 @@ protected:
 	/**
 	* コンストラクタ（プロテクト宣言）
 	*/
-	COperatorTask(void){};
+	OperatorTask(void){};
 
 public:
 	/**
 	* デストラクタ
 	*/
-	virtual ~COperatorTask(void){
+	virtual ~OperatorTask(void){
 		Reset();
 	}
 
@@ -246,7 +258,7 @@ public:
 	}
 };
 
-class CSnowmanTask : public COperatorTask
+class SnowmanTask : public OperatorTask
 {
 private:
 	void CreateNormalBullet(Dix::sp<Snowman> &SPSnowman);
@@ -254,7 +266,7 @@ private:
 	void CreateGravifiedBullet(Dix::sp<Snowman> &SPSnowman);
 
 public:
-	CSnowmanTask(Dix::sp<IOperator> sp_ope = NULL){
+	SnowmanTask(Dix::sp<IOperator> sp_ope = NULL){
 		if(sp_ope.GetPtr() != NULL){
 			SetOperator(sp_ope, true);
 		}
@@ -271,14 +283,14 @@ public:
 	virtual bool Update();
 };
 
-class CZetsubouTask : public COperatorTask
+class ZetsubouTask : public OperatorTask
 {
 private:
 	int count_min;
 	unsigned MAX_NUM_FOES;			//!< @brief 画面に出現できる敵の数
 	float EXTRA_MARGIN;		//!< @brief 弾発射の際考慮する範囲の余白の幅
-	CTimerForGames *p_timer;
-	CTimerForGames::TimerID timer_id;
+	TimerForGames *p_timer;
+	TimerForGames::TimerID timer_id;
 	
 	/**
 	* 新たな敵を出現させる
@@ -286,8 +298,8 @@ private:
 	void CreatNewZetsu(void);
 
 public:
-	CZetsubouTask(Dix::sp<IOperator> sp_ope = NULL) : count_min(0), EXTRA_MARGIN(20.0f), MAX_NUM_FOES(10), timer_id(0){
-		p_timer = &CTimerForGames::Instance();
+	ZetsubouTask(Dix::sp<IOperator> sp_ope = NULL) : count_min(0), EXTRA_MARGIN(20.0f), MAX_NUM_FOES(10), timer_id(0){
+		p_timer = &TimerForGames::Instance();
 		if(sp_ope.GetPtr() != NULL){
 			SetOperator(sp_ope, true);
 		}
@@ -313,10 +325,10 @@ public:
 		Dix::sp<Zetsubou> sp_zetsu;
 		Dix::sp<ScoreObj> sp_dummy = Score::Instance().GetDummyObj();
 
-		for(unsigned i = 0; i < CMyFactory<Zetsubou>::Instance().Size(); ++i){
+		for(unsigned i = 0; i < MyFactory<Zetsubou>::Instance().Size(); ++i){
 			Dix::sp<ScoreObj> sp_score_obj(new ScoreObj(50, sp_dummy->GetManyTimes()));
 			Score::Instance().AddObj(sp_score_obj);
-			CMyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
+			MyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
 			sp_zetsu->Clear();
 		}
 	}
@@ -327,10 +339,10 @@ public:
 	virtual bool Update();
 };
 
-class CSelfBulletTask : public COperatorTask
+class SelfBulletTask : public OperatorTask
 {
 public:
-	CSelfBulletTask(Dix::sp<IOperator> sp_ope = NULL){
+	SelfBulletTask(Dix::sp<IOperator> sp_ope = NULL){
 		if(sp_ope.GetPtr() != NULL){
 			SetOperator(sp_ope, true);
 		}
@@ -342,10 +354,10 @@ public:
 	virtual bool Update(void);
 };
 
-class CFoeBulletTask : public COperatorTask
+class FoeBulletTask : public OperatorTask
 {
 public:
-	CFoeBulletTask(Dix::sp<IOperator> sp_ope = NULL){
+	FoeBulletTask(Dix::sp<IOperator> sp_ope = NULL){
 		if(sp_ope.GetPtr() != NULL){
 			SetOperator(sp_ope, true);
 		}
@@ -357,8 +369,8 @@ public:
 	*/
 	void Eliminate(void){
 		Dix::sp<FoeBullet> sp_foe_bul;
-		for(unsigned i = 0; i < CMyFactory<FoeBullet>::Instance().Size(); ++i){
-			CMyFactory<FoeBullet>::Instance().Create(i, sp_foe_bul);
+		for(unsigned i = 0; i < MyFactory<FoeBullet>::Instance().Size(); ++i){
+			MyFactory<FoeBullet>::Instance().Create(i, sp_foe_bul);
 			sp_foe_bul->Clear();
 		}
 	}
@@ -369,17 +381,17 @@ public:
 	virtual bool Update(void);
 };
 
-class CItemTask : public COperatorTask
+class ItemTask : public OperatorTask
 {
 private:
 	int next_count;		//!< @brief 次にアイテムが登場する時間
 	int cur_score;		//!< @brief 現在のスコア
-	CTimerForGames *p_timer;
-	CTimerForGames::TimerID timer_id;
+	TimerForGames *p_timer;
+	TimerForGames::TimerID timer_id;
 	
 	bool CreateLifeEx(void){
 		Dix::sp<LifeExtend> sp;
-		CMyFactory<LifeExtend>::Instance().Create(0, sp);
+		MyFactory<LifeExtend>::Instance().Create(0, sp);
 		ResetOpes(true);
 		return true;
 	}
@@ -387,7 +399,7 @@ private:
 	bool CreateBarrier(void){
 		Dix::sp<Barrier> sp;
 		if(cur_score >= 12000){
-			CMyFactory<Barrier>::Instance().Create(0, sp);
+			MyFactory<Barrier>::Instance().Create(0, sp);
 			ResetOpes(true);
 			return true;
 		}
@@ -397,7 +409,7 @@ private:
 	bool CreateQuick(void){
 		Dix::sp<Quick> sp;
 		if(cur_score >= 15000){
-			CMyFactory<Quick>::Instance().Create(0, sp);
+			MyFactory<Quick>::Instance().Create(0, sp);
 			ResetOpes(true);
 			return true;
 		}
@@ -407,7 +419,7 @@ private:
 	bool CreateMultiplier(void){
 		Dix::sp<Multiplier> sp;
 		if(cur_score >= 20000){
-			CMyFactory<Multiplier>::Instance().Create(0, sp);
+			MyFactory<Multiplier>::Instance().Create(0, sp);
 			ResetOpes(true);
 			return true;
 		}
@@ -417,7 +429,7 @@ private:
 	bool CreateEliminator(void){
 		Dix::sp<Eliminator> sp;
 		if(cur_score >= 25000){
-			CMyFactory<Eliminator>::Instance().Create(0, sp);
+			MyFactory<Eliminator>::Instance().Create(0, sp);
 			ResetOpes(true);
 			return true;
 		}
@@ -427,7 +439,7 @@ private:
 	bool CreateTriBullets(void){
 		Dix::sp<TriBullets> sp;
 		if(cur_score >= 30000){
-			CMyFactory<TriBullets>::Instance().Create(0, sp);
+			MyFactory<TriBullets>::Instance().Create(0, sp);
 			ResetOpes(true);
 			return true;
 		}
@@ -437,7 +449,7 @@ private:
 	bool CreateGravifiedBullet(void){
 		Dix::sp<GravifiedBullet> sp;
 		if(cur_score >= 0){
-			CMyFactory<GravifiedBullet>::Instance().Create(0, sp);
+			MyFactory<GravifiedBullet>::Instance().Create(0, sp);
 			ResetOpes(true);
 			return true;
 		}
@@ -447,8 +459,8 @@ private:
 	bool CreateEliminatorX(void){
 		Dix::sp<EliminatorX> sp;
 		if(cur_score >= 45000){
-			CMyFactory<EliminatorX>::Instance().Create(0, sp);
-			Dix::sp<COperatorChaseAfter> sp_after(new COperatorChaseAfter);
+			MyFactory<EliminatorX>::Instance().Create(0, sp);
+			Dix::sp<OperatorChaseAfter> sp_after(new OperatorChaseAfter);
 			ResetOpes(true);
 			SetOperator(sp_after, true);
 			return true;
@@ -457,9 +469,9 @@ private:
 	}
 
 public:
-	CItemTask(Dix::sp<IOperator> sp_ope = NULL) : timer_id(0){
+	ItemTask(Dix::sp<IOperator> sp_ope = NULL) : timer_id(0){
 		next_count = GetRand(10000) + 20000;
-		p_timer = &CTimerForGames::Instance();
+		p_timer = &TimerForGames::Instance();
 		if(sp_ope.GetPtr() != NULL){
 			SetOperator(sp_ope, true);
 		}
@@ -473,7 +485,7 @@ public:
 	void CreateNewItem(void);
 };
 
-class CTouchTask : public CTaskBase
+class TouchTask : public TaskBase
 {
 private:
 	Dix::sp<Snowman> sp_snowman;
@@ -481,7 +493,7 @@ private:
 	Dix::sp<Items> sp_item;
 
 public:
-	CTouchTask(void){
+	TouchTask(void){
 		m_bUsageFlag = true;
 	}
 
@@ -518,10 +530,10 @@ public:
 	void Others(void);
 };
 
-class CScoreTask : public CTaskBase
+class ScoreTask : public TaskBase
 {
 public:
-	CScoreTask(void){
+	ScoreTask(void){
 		m_bUsageFlag = true;
 	}
 
@@ -533,7 +545,8 @@ public:
 	bool Update(void);
 };
 
-class CReplayTask : public CTaskBase
+#if 0
+class ReplayTask : public TaskBase
 {
 private:
 	bool replay_flag;
@@ -541,10 +554,10 @@ private:
 	std::ifstream i_file;
 	Dix::sp<boost::archive::text_oarchive> sp_oarchive;
 	Dix::sp<boost::archive::text_iarchive> sp_iarchive;
-	CInputDeviceKeyBoard *p_keyboard;
+	InputDeviceKeyBoard *p_keyboard;
 
 public:
-	CReplayTask(CInputDeviceKeyBoard *p_key);
+	ReplayTask(InputDeviceKeyBoard *p_key);
 
 	/**
 	* 実際にファイルにデータを保存する
@@ -563,5 +576,6 @@ public:
 	*/
 	void SetRecordingFile(const char src[]);
 };
+#endif
 
 #endif

@@ -7,15 +7,15 @@
 #include "MyDrawObj.h"
 #include "Snowman.h"
 
-class SelfBullet : public CMyDrawObj, public CCharacter, public CTouchObj
+class SelfBullet : public MyDrawObj, public Character, public TouchObj
 {
 protected:
-	const float AMOUNT_BULLET_MOVE;
+	const double AMOUNT_BULLET_MOVE;
 
 public:
 	SelfBullet();
 	~SelfBullet(){};
-	bool Dispatch(CTouchObj *other){
+	bool Dispatch(TouchObj *other){
 		return(other->Touch(this));
 	}
 };
@@ -40,17 +40,17 @@ public:
 	bool Touch(Zetsubou *other);
 };
 
-class FoeBullet : public CMyDrawObj, public CCharacter, public CTouchObj
+class FoeBullet : public MyDrawObj, public Character, public TouchObj
 {
 private:
-	float AMOUNT_BULLET_MOVE;
-	const float AMOUNT_LAUNCHED_BULLETS;
+	double AMOUNT_BULLET_MOVE;
+	const int AMOUNT_LAUNCHED_BULLETS;
 
 public:
 	FoeBullet();
 	~FoeBullet(){};
 	bool Draw(void);
-	bool Dispatch(CTouchObj *other){
+	bool Dispatch(TouchObj *other){
 		return(other->Touch(this));
 	}
 

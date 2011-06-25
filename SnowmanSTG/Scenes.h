@@ -2,16 +2,16 @@
 #define _SCENE_H
 
 
-class CScenesBase;
-class CTaskSystem;
-class CInputDeviceKeyBoard;
-class CBackObj;
+class ScenesBase;
+class TaskSystem;
+class InputDeviceKeyBoard;
+class BackObj;
 class Score;
 enum MENUS;
 
-typedef Dix::sp<CScenesBase> SPScenes;
-typedef Dix::sp<CTaskSystem> SPTaskSystem;
-typedef Dix::sp<CInputDeviceKeyBoard> SPKeyBoard;
+typedef Dix::sp<ScenesBase> SPScenes;
+typedef Dix::sp<TaskSystem> SPTaskSystem;
+typedef Dix::sp<InputDeviceKeyBoard> SPKeyBoard;
 
 class IMenus
 {
@@ -19,7 +19,7 @@ public:
 	virtual void Execute(void) = 0;
 };
 
-class CScenesBase
+class ScenesBase
 {
 protected:
 	SPTaskSystem sp_task_system;
@@ -28,8 +28,8 @@ protected:
 	bool active_flag;			//そのシーンが有効かどうか
 
 public:
-	CScenesBase(void) : active_flag(true){};
-	virtual ~CScenesBase(void){};
+	ScenesBase(void) : active_flag(true){};
+	virtual ~ScenesBase(void){};
 	virtual void AddScene(SPScenes sp){};
 	virtual void RemoveScenes(void){};
 	
@@ -40,7 +40,7 @@ public:
 	virtual void Begin(void){};
 };
 
-class CSceneParent : public CScenesBase
+class SceneParent : public ScenesBase
 {
 private:
 	std::list<SPScenes> scene_list;	//子シーンリスト
@@ -51,7 +51,7 @@ public:
 	}
 
 	void RemoveScenes(void){
-		scene_list.remove_if(boost::mem_fn(&CScenesBase::IsNotActive));
+		scene_list.remove_if(boost::mem_fn(&ScenesBase::IsNotActive));
 	}
 
 	void Begin(void){
@@ -62,29 +62,29 @@ public:
 	}
 };
 
-class CSceneTitle : public CScenesBase
+class SceneTitle : public ScenesBase
 {
 private:
 	
 	class IMainMenu: public IMenus
 	{
 	protected:
-		CSceneTitle *p_title;
+		SceneTitle *p_title;
 	};
 
-	class CMenuStartGame : public IMainMenu
+	class MenuStartGame : public IMainMenu
 	{
 	public:
-		CMenuStartGame(CSceneTitle *p){
+		MenuStartGame(SceneTitle *p){
 			p_title = p;
 		}
 		void Execute(void);
 	};
 
-	class CMenuReplayGame : public IMainMenu
+	class MenuReplayGame : public IMainMenu
 	{
 	public:
-		CMenuReplayGame(CSceneTitle *p){
+		MenuReplayGame(SceneTitle *p){
 			p_title = p;
 		}
 		void Execute(void);
@@ -93,8 +93,8 @@ private:
 	IMainMenu *p_menu;
 
 public:
-	CSceneTitle(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key);
-	virtual ~CSceneTitle(void){};
+	SceneTitle(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key);
+	virtual ~SceneTitle(void){};
 	void Invoke(MENUS &menu);
 	void AddScene(SPScenes sp){};
 	void RemoveScene(SPScenes sp){};
@@ -102,28 +102,28 @@ public:
 	void Begin(void);
 };
 
-class CSceneGaming : public CScenesBase
+class SceneGaming : public ScenesBase
 {
 private:
-	Dix::sp<CBackObj> sp_back;
+	Dix::sp<BackObj> sp_back;
 	Dix::sp<Score> sp_score;
 
 public:
-	CSceneGaming(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key);
-	virtual ~CSceneGaming(void){};
+	SceneGaming(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key);
+	virtual ~SceneGaming(void){};
 	void AddScene(SPScenes sp){};
 	void RemoveScene(SPScenes sp){};
 	SPScenes GetChild(int &Num){};
 	void Begin(void);
 };
 
-class CSceneScore : public CScenesBase
+class SceneScore : public ScenesBase
 {
 private:
 	int white;
 
 public:
-	CSceneScore(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key);
+	SceneScore(SPScenes sp_paren, SPTaskSystem &sp_task, SPKeyBoard &sp_key);
 	void AddScene(SPScenes sp){};
 	void RemoveScene(SPScenes sp){};
 	SPScenes GetChild(int &Num){};

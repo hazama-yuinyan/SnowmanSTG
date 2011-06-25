@@ -19,7 +19,7 @@ enum MENUS{START_GAME, REPLAY_GAME, MENU_END};
 /**
 * 描画基底クラス
 */
-class CDrawObj
+class DrawObj
 {
 protected:
 	HAZAMA::RECT rect;	//!< @brief 描画する画像の大きさ
@@ -29,10 +29,10 @@ protected:
 	/**
 	* コンストラクタ（プロテクト宣言）
 	*/
-	CDrawObj(const int PriorityNum) : draw_flag(true), draw_priority_num(PriorityNum){};
+	DrawObj(const int PriorityNum) : draw_flag(true), draw_priority_num(PriorityNum){};
 
 public:
-	virtual ~CDrawObj(void){};
+	virtual ~DrawObj(void){};
 
 	/**
 	* 描画しないように設定する
@@ -64,7 +64,7 @@ public:
 	/**
 	* 描画優先順位の比較のための演算子オーバーロード
 	*/
-	bool operator<(CDrawObj &rhs){
+	bool operator<(DrawObj &rhs){
 		return(this->draw_priority_num < rhs.draw_priority_num);
 	}
 };
@@ -72,7 +72,7 @@ public:
 /**
 * 普通の画像を描画するクラスの基底クラス
 */
-class CMyDrawObj : public CDrawObj
+class MyDrawObj : public DrawObj
 {
 protected:
 	static int pic_handles[PIC_END];					//!< @brief 画像のハンドルを保持する配列
@@ -81,13 +81,13 @@ protected:
 	/**
 	* コンストラクタ（プロテクト宣言）
 	*/
-	CMyDrawObj(const int PriorityNum) : CDrawObj(PriorityNum){};
+	MyDrawObj(const int PriorityNum) : DrawObj(PriorityNum){};
 
 public:
 	/**
 	* デコンストラクタ
 	*/
-	~CMyDrawObj(){};
+	~MyDrawObj(){};
 
 	/**
 	* オブジェクトに使う画像を配列に読み込む
@@ -95,7 +95,7 @@ public:
 	static void LoadPic(void);
 };
 
-class CTitleObj : public CMyDrawObj
+class TitleObj : public MyDrawObj
 {
 private:
 	int color[MENU_END];
@@ -104,9 +104,9 @@ public:
 	/**
 	* コンストラクタ
 	*/
-	CTitleObj() : CMyDrawObj(0){
-		color[0] = GetColor(255, 0, 0);
-		color[1] = GetColor(0, 0, 0);
+	TitleObj() : MyDrawObj(0){
+		color[0] = HAZAMA::draw_helper->GetColorCode(255, 0, 0);
+		color[1] = HAZAMA::draw_helper->GetColorCode(0, 0, 0);
 	};
 
 	/**
@@ -116,20 +116,20 @@ public:
 	void SetStrColor(MENUS menu);
 };
 
-class CBackObj : public CMyDrawObj
+class BackObj : public MyDrawObj
 {
 public:
 	/**
 	* コンストラクタ
 	*/
-	CBackObj() : CMyDrawObj(0){};
+	BackObj() : MyDrawObj(0){};
 
 	/**
 	* 描画関数
 	*/
 	bool Draw(void){
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 255);		//重ねて描画できるようにする
-		DrawGraph(0, 0, pic_handles[BACK], false);
+		HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::ALPHA, 255);		//重ねて描画できるようにする
+		HAZAMA::draw_helper->DrawImage(0, 0, pic_handles[BACK], false);
 		return true;
 	}
 };
@@ -161,7 +161,7 @@ public:
 	}
 };
 
-class Score : public CMyDrawObj
+class Score : public MyDrawObj
 {
 private:
 	const int RANK_DRAW_START_POS;	//!< @brief ランキングを描画し始める座標

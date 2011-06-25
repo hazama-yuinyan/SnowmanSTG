@@ -7,23 +7,23 @@
 using namespace HAZAMA;
 
 
-SelfBullet::SelfBullet(void) : CMyDrawObj(3), AMOUNT_BULLET_MOVE(600.0f)
+SelfBullet::SelfBullet(void) : MyDrawObj(3), AMOUNT_BULLET_MOVE(600.0)
 {
 	speed = AMOUNT_BULLET_MOVE;
-	vect(1.0f * speed, 0);
-	rect(0, 0, 32.0f, 32.0f);
-	touch_rect(4.0f, 4.0f, 28.0f, 28.0f);
+	vect(1.0 * speed, 0);
+	rect(0, 0, 32.0, 32.0);
+	touch_rect(4.0, 4.0, 28.0, 28.0);
 }
 
 bool SelfNormalBullet::Draw(void)
 {
-	if((pos.x >= RIGHT_EDGE_POSITION) || (pos.y <= UPPER_EDGE_POSITION - 32.0f) 
+	if((pos.x >= RIGHT_EDGE_POSITION) || (pos.y <= UPPER_EDGE_POSITION - 32.0) 
 			|| (pos.y >= LOWER_EDGE_POSITION)){	//画面の右端または上端、下端に達したら消す
 				Clear();
 			return true;
 	}
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SELFBULLET], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SELFBULLET], true);
 	return true;
 }
 
@@ -39,13 +39,13 @@ bool SelfNormalBullet::Touch(Zetsubou *other)
 
 bool SelfGravifiedBullet::Draw(void)
 {
-	if((pos.x >= RIGHT_EDGE_POSITION) || (pos.y <= UPPER_EDGE_POSITION - 32.0f) 
+	if((pos.x >= RIGHT_EDGE_POSITION) || (pos.y <= UPPER_EDGE_POSITION - 32.0) 
 			|| (pos.y >= LOWER_EDGE_POSITION)){	//画面の右端または上端、下端に達したら消す
 				Clear();
 			return true;
 	}
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SELFBULLET], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SELFBULLET], true);
 	return true;
 }
 
@@ -60,12 +60,12 @@ bool SelfGravifiedBullet::Touch(Zetsubou *other)
 }
 
 /*ここから敵の弾のクラス*/
-FoeBullet::FoeBullet(void) : CMyDrawObj(4), AMOUNT_BULLET_MOVE(600.0f), AMOUNT_LAUNCHED_BULLETS(3)
+FoeBullet::FoeBullet(void) : MyDrawObj(4), AMOUNT_BULLET_MOVE(600.0), AMOUNT_LAUNCHED_BULLETS(3)
 {
 	speed = AMOUNT_BULLET_MOVE;
-	vect(-1.0f * speed, 0);
-	rect(0, 0, 24.0f, 10.0f);
-	touch_rect(6.0f, 0, 6.0f, 0);
+	vect(-1.0 * speed, 0);
+	rect(0, 0, 24.0, 10.0);
+	touch_rect(6.0, 0, 6.0, 0);
 }
 
 /*void FoeBullet::Move(void){				//現在の敵の位置に新しく弾を表示する
@@ -104,8 +104,8 @@ bool FoeBullet::Draw(void){
 				Clear();
 			return true;
 	}
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[FOEBULLET], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[FOEBULLET], true);
 	return true;
 }
 

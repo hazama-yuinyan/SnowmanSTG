@@ -8,17 +8,17 @@ class Zetsubou;
 class SelfBullet;
 class FoeBullet;
 class Items;
-class CExploAnim;
+class ExploAnim;
 
 
-class CTouchObj : public HAZAMA::ITouch
+class TouchObj : public HAZAMA::ITouch
 {
 protected:
 	HAZAMA::RECT touch_rect;	//!< @brief 当たり判定用の矩形の頂点座標
 
 public:
-	CTouchObj(){};
-	virtual ~CTouchObj(){};
+	TouchObj(){};
+	virtual ~TouchObj(){};
 
 	HAZAMA::RECT GetTouchRect(void){return touch_rect;}
 
@@ -27,9 +27,9 @@ public:
 	virtual bool Touch(SelfBullet *other){return false;}
 	virtual bool Touch(FoeBullet *other){return false;}
 	virtual bool Touch(Items *other){return false;}
-	virtual bool Touch(CExploAnim *other){return false;}
+	virtual bool Touch(ExploAnim *other){return false;}
 
-	virtual bool Dispatch(CTouchObj *other) = 0;
+	virtual bool Dispatch(TouchObj *other) = 0;
 };
 
 #endif

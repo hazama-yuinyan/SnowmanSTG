@@ -4,6 +4,7 @@
 #pragma once
 #define _USE_MATH_DEFINES
 #define USE_GAME_TIMER
+#define USE_DXLIB
 
 #include <iostream>
 #include <fstream>
@@ -19,28 +20,27 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
-#include "DxLib.h"
 #include "DixSmartPtr.h"
 #include "Timer.h"
 #include "Hazama.h"
 
 #ifdef _DEBUG
-#pragma comment(lib, "MyLibrary.lib")
+#pragma comment(lib, "MyLibraryDxLib_d.lib")
 #pragma comment(lib, "MyTimer_d.lib")
 #else
-#pragma comment(lib, "MyLibraryRelease.lib")
+#pragma comment(lib, "MyLibraryDxLib.lib")
 #pragma comment(lib, "MyTimer.lib")
 #endif
 
-static const float RIGHT_EDGE_POSITION = 640.0f;
-static const float LEFT_EDGE_POSITION = 0.0f;
-static const float UPPER_EDGE_POSITION = 0.0f;
-static const float LOWER_EDGE_POSITION = 480.0f;
+static const double RIGHT_EDGE_POSITION = 640.0;
+static const double LEFT_EDGE_POSITION = 0.0;
+static const double UPPER_EDGE_POSITION = 0.0;
+static const double LOWER_EDGE_POSITION = 480.0;
 
-static const float INITIAL_SELF_POSITION_X = 0.0f;
-static const float INITIAL_SELF_POSITION_Y = 200.0f;
+static const double INITIAL_SELF_POSITION_X = 0.0;
+static const double INITIAL_SELF_POSITION_Y = 200.0;
 
-static const float INITIAL_FOE_POSITION = 640.0f;
+static const double INITIAL_FOE_POSITION = 640.0;
 
 static const int MAX_INITIAL_POS_Y = 440;
 

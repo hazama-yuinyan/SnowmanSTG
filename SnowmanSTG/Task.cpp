@@ -5,16 +5,16 @@
 
 
 
-CTaskSystem::CTaskSystem(CInputDeviceKeyBoard *p_key) : continue_flag(true)
+TaskSystem::TaskSystem(InputDeviceKeyBoard *p_key) : continue_flag(true)
 {
-	Dix::sp<IOperator> sp_ope_straight(new COperatorStraight);
-	Dix::sp<CDrawTask> sp_draw_task(new CDrawTask);
-	Dix::sp<CSnowmanTask> sp_task_snow(new CSnowmanTask(sp_ope_straight));
-	Dix::sp<CZetsubouTask> sp_task_zetsu(new CZetsubouTask(sp_ope_straight));
-	Dix::sp<CSelfBulletTask> sp_task_sel_bul(new CSelfBulletTask(sp_ope_straight));
-	Dix::sp<CFoeBulletTask> sp_task_foe_bul(new CFoeBulletTask(sp_ope_straight));
-	Dix::sp<CItemTask> sp_task_item(new CItemTask(sp_ope_straight));
-	Dix::sp<CReplayTask> sp_replay(new CReplayTask(p_key));
+	Dix::sp<IOperator> sp_ope_straight(new OperatorStraight);
+	Dix::sp<DrawTask> sp_draw_task(new DrawTask);
+	Dix::sp<SnowmanTask> sp_task_snow(new SnowmanTask(sp_ope_straight));
+	Dix::sp<ZetsubouTask> sp_task_zetsu(new ZetsubouTask(sp_ope_straight));
+	Dix::sp<SelfBulletTask> sp_task_sel_bul(new SelfBulletTask(sp_ope_straight));
+	Dix::sp<FoeBulletTask> sp_task_foe_bul(new FoeBulletTask(sp_ope_straight));
+	Dix::sp<ItemTask> sp_task_item(new ItemTask(sp_ope_straight));
+	//Dix::sp<ReplayTask> sp_replay(new ReplayTask(p_key));
 
 	m_mapTask.insert(TASK_PAIR(TASK_DRAW, sp_draw_task));
 	m_mapTask.insert(TASK_PAIR(TASK_SNOWMAN, sp_task_snow));
@@ -22,37 +22,37 @@ CTaskSystem::CTaskSystem(CInputDeviceKeyBoard *p_key) : continue_flag(true)
 	m_mapTask.insert(TASK_PAIR(TASK_SELFBULLET, sp_task_sel_bul));
 	m_mapTask.insert(TASK_PAIR(TASK_FOEBULLET, sp_task_foe_bul));
 	m_mapTask.insert(TASK_PAIR(TASK_ITEM, sp_task_item));
-	m_mapTask.insert(TASK_PAIR(TASK_REPLAY, sp_replay));
+	//m_mapTask.insert(TASK_PAIR(TASK_REPLAY, sp_replay));
 
-	CMyObjectFactory::SetDrawTask(sp_draw_task.GetPtr());
+	MyObjectFactory::SetDrawTask(sp_draw_task.GetPtr());
 	SwitchTask(TASK_DRAW);
 }
 
-bool CTaskSystem::Init(void)
+bool TaskSystem::Init(void)
 {
-	Dix::sp<CTouchTask> sp_task_touch(new CTouchTask);
-	Dix::sp<CScoreTask> sp_task_score(new CScoreTask);
+	Dix::sp<TouchTask> sp_task_touch(new TouchTask);
+	Dix::sp<ScoreTask> sp_task_score(new ScoreTask);
 	
-	CReplayTask *p_replay = GetTask<CReplayTask>(TASK_REPLAY);
-	p_replay->SetRecordingFile("Data\\Replay\\replay.dat");
+	//ReplayTask *p_replay = GetTask<ReplayTask>(TASK_REPLAY);
+	//p_replay->SetRecordingFile("Data\\Replay\\replay.dat");
 
 	m_mapTask.insert(TASK_PAIR(TASK_TOUCH, sp_task_touch));
 	m_mapTask.insert(TASK_PAIR(TASK_SCORE, sp_task_score));
 	return true;
 }
 
-bool CTaskSystem::Update(void)
+bool TaskSystem::Update(void)
 {
 	TASK_MAP::iterator it = m_mapActTask.begin();
 	for(; it != m_mapActTask.end(); ++it){
 		(*it).second->Update();
 	}
 	CheckTaskMessage();
-	CTimerForGames::Instance().GetTotalTime();	//タイマー更新
+	TimerForGames::Instance().GetTotalTime();	//タイマー更新
 	return continue_flag;
 }
 
-void CTaskSystem::SwitchMovingTasks(bool OnOrOff)
+void TaskSystem::SwitchMovingTasks(bool OnOrOff)
 {
 	SwitchTask(TASK_SNOWMAN, OnOrOff);
 	SwitchTask(TASK_ZETSUBOU, OnOrOff);
@@ -63,7 +63,7 @@ void CTaskSystem::SwitchMovingTasks(bool OnOrOff)
 	SwitchTask(TASK_REPLAY, OnOrOff);
 }
 
-void CTaskSystem::CheckTaskMessage(void)
+void TaskSystem::CheckTaskMessage(void)
 {
 	if(GetTaskMessage(TASK_TOUCH) == DONT_MOVE){
 		SwitchMovingTasks();
@@ -76,44 +76,44 @@ void CTaskSystem::CheckTaskMessage(void)
 
 		SwitchMovingTasks(true);
 		if(GetTaskMessage(TASK_DRAW) == ELIMINATING){	//アイテムeliminator取得時の処理
-			CZetsubouTask *p_zetsu;
-			CFoeBulletTask *p_foe_bullet;
-			p_zetsu = GetTask<CZetsubouTask>(TASK_ZETSUBOU);
-			p_foe_bullet = GetTask<CFoeBulletTask>(TASK_FOEBULLET);
+			ZetsubouTask *p_zetsu;
+			FoeBulletTask *p_foe_bullet;
+			p_zetsu = GetTask<ZetsubouTask>(TASK_ZETSUBOU);
+			p_foe_bullet = GetTask<FoeBulletTask>(TASK_FOEBULLET);
 			p_zetsu->Eliminate();
 			p_foe_bullet->Eliminate();
 		}
 
 		ResetMessage(TASK_DRAW);
 	}else if(GetTaskMessage(TASK_SNOWMAN) != NONE){		//SelfBullet変更後の処理
-		CSelfBulletTask *p_self_bullet;
-		p_self_bullet = GetTask<CSelfBulletTask>(TASK_SELFBULLET);
+		SelfBulletTask *p_self_bullet;
+		p_self_bullet = GetTask<SelfBulletTask>(TASK_SELFBULLET);
 		p_self_bullet->ResetOpes(true);
 		if(GetTaskMessage(TASK_SNOWMAN) == ADD_OPE_APPLYGRAVITY){
-			Dix::sp<COperatorApplyGravity> sp_gravity(new COperatorApplyGravity);
+			Dix::sp<OperatorApplyGravity> sp_gravity(new OperatorApplyGravity);
 			p_self_bullet->SetOperator(sp_gravity, true);
 		}
 	}
 }
 
-void CTaskSystem::SetReplayMode(bool Flag)
+void TaskSystem::SetReplayMode(bool Flag)
 {
-	CReplayTask *p_replay = GetTask<CReplayTask>(TASK_REPLAY);
-	p_replay->TurnReplayFlag(Flag);
+	//ReplayTask *p_replay = GetTask<ReplayTask>(TASK_REPLAY);
+	//p_replay->TurnReplayFlag(Flag);
 }
 
-bool CDrawTask::Update(void)
+bool DrawTask::Update(void)
 {
-	SetDrawScreen(DX_SCREEN_BACK);
-	ClearDrawScreen();
+	HAZAMA::draw_helper->SetDrawScreen(HAZAMA::DrawHelper::BACK);
+	HAZAMA::draw_helper->InitializeScreen();
 
-	remove_copy_if(l_sp_draw_obj.begin(), l_sp_draw_obj.end(), l_have_msgs_obj.begin(), mem_fn(&CDrawObj::Draw));
+	remove_copy_if(l_sp_draw_obj.begin(), l_sp_draw_obj.end(), l_have_msgs_obj.begin(), mem_fn(&DrawObj::Draw));
 		
 	if(IsMessaged()){	//メッセージを発したいオブジェクトがあった場合
 		EraseDummies();	//ダミーの要素を消す
 
 		OBJ_MSG msg = NOTHING;		//オブジェクトからメッセージを受け取る
-		for_each(l_have_msgs_obj.begin(), l_have_msgs_obj.end(), boost::bind(&CDrawObj::MessageGet, _1, ref(msg)));
+		std::for_each(l_have_msgs_obj.begin(), l_have_msgs_obj.end(), boost::bind(&DrawObj::MessageGet, _1, boost::ref(msg)));
 		if(msg == MOVING){
 			message = CAN_MOVE;
 		}else if(msg == ELIMINATE){
@@ -128,13 +128,13 @@ bool CDrawTask::Update(void)
 
 	/*画面に描画されないものはリストから外す
 		同時にfactoryクラスからも消去される*/
-	l_sp_draw_obj.remove_if(boost::mem_fn(&CDrawObj::IsNotDrawn));
+	l_sp_draw_obj.remove_if(boost::mem_fn(&DrawObj::IsNotDrawn));
 
-	ScreenFlip();
+	HAZAMA::draw_helper->FlipScreen();
 	return true;
 }
 
-void CDrawTask::InittheList(void)
+void DrawTask::InittheList(void)
 {
 	unsigned i = 0;
 
@@ -151,16 +151,16 @@ void CDrawTask::InittheList(void)
 	}
 }
 
-bool CSnowmanTask::Update(void)
+bool SnowmanTask::Update(void)
 {
-	Dix::sp<CMoveOperator> sp_move_ope;
+	Dix::sp<MoveOperator> sp_move_ope;
 	Dix::sp<Snowman> sp_snowman;
 
 	if(!CheckUsageFlag()){
 		return false;	// 使えない
 	}
 
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
 
 	//移動に関するオペレーターを動かす
 	for(int i = v_sp_ope.size() - 1; i >= 0; --i){
@@ -179,43 +179,43 @@ bool CSnowmanTask::Update(void)
 	return true;
 }
 
-void CSnowmanTask::Shoot(void)
+void SnowmanTask::Shoot(void)
 {
-	void (CSnowmanTask::*func_tbl[GRAVIFIED+1])(Dix::sp<Snowman>&) = {
-		&CSnowmanTask::CreateNormalBullet,
-		&CSnowmanTask::CreateTriBullets,
-		&CSnowmanTask::CreateGravifiedBullet
+	void (SnowmanTask::*func_tbl[GRAVIFIED+1])(Dix::sp<Snowman>&) = {
+		&SnowmanTask::CreateNormalBullet,
+		&SnowmanTask::CreateTriBullets,
+		&SnowmanTask::CreateGravifiedBullet
 	};
 	Dix::sp<Snowman> sp_snowman;
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
 
 	int creating_bullet_num = static_cast<int>(sp_snowman->GetBulletType());
 	(this->*func_tbl[creating_bullet_num])(sp_snowman);
 }
 
-void CSnowmanTask::CreateNormalBullet(Dix::sp<Snowman> &SPSnowman)
+void SnowmanTask::CreateNormalBullet(Dix::sp<Snowman> &SPSnowman)
 {
 	Dix::sp<SelfNormalBullet> sp_self_bullet;
-	OBJID objid = CMyFactory<SelfNormalBullet>::Instance().Size();
+	OBJID objid = MyFactory<SelfNormalBullet>::Instance().Size();
 
-	 CMyFactory<SelfNormalBullet>::Instance().Create(objid, sp_self_bullet);
+	 MyFactory<SelfNormalBullet>::Instance().Create(objid, sp_self_bullet);
 
 	//弾の初期位置を設定する
 	HAZAMA::VECTOR2 initial_pos = SPSnowman->GetPosition();
 	initial_pos.x += SPSnowman->GetRect().right;
-	initial_pos.y += 32.0f;
+	initial_pos.y += 32.0;
 	sp_self_bullet->SetPosition(initial_pos);
 	message = REMOVE_EXTRA_OPE;
 }
 
-void CSnowmanTask::CreateTriBullets(Dix::sp<Snowman> &SPSnowman)
+void SnowmanTask::CreateTriBullets(Dix::sp<Snowman> &SPSnowman)
 {
 	Dix::sp<SelfNormalBullet> sp_self_bullet;
-	OBJID objid =  CMyFactory<SelfNormalBullet>::Instance().Size();
+	OBJID objid =  MyFactory<SelfNormalBullet>::Instance().Size();
 
 	for(int i = 0; i < 3; ++i){
 		objid += i;
-		CMyFactory<SelfNormalBullet>::Instance().Create(objid, sp_self_bullet);
+		MyFactory<SelfNormalBullet>::Instance().Create(objid, sp_self_bullet);
 
 		//弾の初期位置を設定する
 		HAZAMA::VECTOR2 initial_pos = SPSnowman->GetPosition();
@@ -225,10 +225,10 @@ void CSnowmanTask::CreateTriBullets(Dix::sp<Snowman> &SPSnowman)
 
 		switch(i){				//発射される順番によってY軸方向の初速度を与える
 			case 1:
-				sp_self_bullet->SetVector(300.0f, 1);
+				sp_self_bullet->SetVector(300.0, 1);
 				break;
 			case 2:
-				sp_self_bullet->SetVector(-300.0f, 1);
+				sp_self_bullet->SetVector(-300.0, 1);
 				break;
 			default:
 				break;
@@ -237,27 +237,27 @@ void CSnowmanTask::CreateTriBullets(Dix::sp<Snowman> &SPSnowman)
 	message = REMOVE_EXTRA_OPE;
 }
 
-void CSnowmanTask::CreateGravifiedBullet(Dix::sp<Snowman> &SPSnowman)
+void SnowmanTask::CreateGravifiedBullet(Dix::sp<Snowman> &SPSnowman)
 {
 	Dix::sp<SelfGravifiedBullet> sp_self_bullet;
-	OBJID objid =  CMyFactory<SelfGravifiedBullet>::Instance().Size();
+	OBJID objid =  MyFactory<SelfGravifiedBullet>::Instance().Size();
 
-	if(!CMyFactory<SelfGravifiedBullet>::Instance().HaveObj()){
+	if(!MyFactory<SelfGravifiedBullet>::Instance().HaveObj()){
 		message = ADD_OPE_APPLYGRAVITY;
 	}
 	
-	CMyFactory<SelfGravifiedBullet>::Instance().Create(objid, sp_self_bullet);
+	MyFactory<SelfGravifiedBullet>::Instance().Create(objid, sp_self_bullet);
 
 	//弾の初期位置を設定する
 	HAZAMA::VECTOR2 initial_pos = SPSnowman->GetPosition();
 	initial_pos.x += SPSnowman->GetRect().right;
-	initial_pos.y += 32.0f;
+	initial_pos.y += 32.0;
 	sp_self_bullet->SetPosition(initial_pos);
 }
 
-bool CZetsubouTask::Update(void)
+bool ZetsubouTask::Update(void)
 {
-	Dix::sp<CMoveOperator> sp_move_ope;
+	Dix::sp<MoveOperator> sp_move_ope;
 	Dix::sp<Zetsubou> sp_zetsu;
 
 	if(!CheckUsageFlag()){
@@ -266,9 +266,9 @@ bool CZetsubouTask::Update(void)
 
 	CreatNewZetsu();
 
-	for(unsigned i = 0; i < CMyFactory<Zetsubou>::Instance().Size(); ++i){ 
+	for(unsigned i = 0; i < MyFactory<Zetsubou>::Instance().Size(); ++i){ 
 		
-		CMyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
+		MyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
 		if(!sp_zetsu->IsNotDrawn()){		//描画されるZetsubouなら弾発射の処理をする
 			Shoot(sp_zetsu);
 		}
@@ -285,31 +285,31 @@ bool CZetsubouTask::Update(void)
 			}
 		}
 
-		sp_zetsu->SetVector(HAZAMA::V2Get(-1.0f * sp_zetsu->GetSpeed(), 0));
+		sp_zetsu->SetVector(HAZAMA::V2Get(-1.0 * sp_zetsu->GetSpeed(), 0));
 	}
 
 	ResetOpes();
 	return true;
 }
 
-void CZetsubouTask::Shoot(Dix::sp<Zetsubou> SP)
+void ZetsubouTask::Shoot(Dix::sp<Zetsubou> SP)
 {
 	Dix::sp<FoeBullet> sp_foe_bullet;
 	HAZAMA::RECT zetsu_rect = SP->GetRect() + SP->GetPosition();	//Zetsubouオブジェクトの頂点の絶対座標を出す
-	if(GetNowCount() % 1000 >= 850 && !IsOthersNearby(zetsu_rect)){
-		CMyFactory<FoeBullet> *p_factory = &CMyFactory<FoeBullet>::Instance();
+	if(static_cast<int>(p_timer->GetTotalTime()) % 1000 >= 850 && !IsOthersNearby(zetsu_rect)){
+		MyFactory<FoeBullet> *p_factory = &MyFactory<FoeBullet>::Instance();
 		OBJID objid = p_factory->Size();
 		p_factory->Create(objid, sp_foe_bullet);
 
 		//弾の初期位置を設定する
 		HAZAMA::VECTOR2 initial_pos = SP->GetPosition();
-		initial_pos.x -= 24.0f;
-		initial_pos.y += 16.0f;
+		initial_pos.x -= 24.0;
+		initial_pos.y += 16.0;
 		sp_foe_bullet->SetPosition(initial_pos);
 	}
 }
 
-bool CZetsubouTask::IsOthersNearby(const HAZAMA::RECT &Rect)
+bool ZetsubouTask::IsOthersNearby(const HAZAMA::RECT &Rect)
 {
 	bool return_bool = false;
 	Dix::sp<FoeBullet> sp_existent;
@@ -317,11 +317,11 @@ bool CZetsubouTask::IsOthersNearby(const HAZAMA::RECT &Rect)
 	HAZAMA::VECTOR2 bullet_pos;
 	HAZAMA::RECT snowman_rect;
 
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
 	snowman_rect = sp_snowman->GetRect();
 
-	for(unsigned i = 0; i < CMyFactory<FoeBullet>::Instance().Size(); ++i){
-		CMyFactory<FoeBullet>::Instance().Create(i, sp_existent);
+	for(unsigned i = 0; i < MyFactory<FoeBullet>::Instance().Size(); ++i){
+		MyFactory<FoeBullet>::Instance().Create(i, sp_existent);
 		bullet_pos = sp_existent->GetPosition();
 		if(Rect.right + snowman_rect.right + EXTRA_MARGIN > bullet_pos.x
 			&& Rect.left - snowman_rect.right - EXTRA_MARGIN < bullet_pos.x
@@ -337,7 +337,7 @@ bool CZetsubouTask::IsOthersNearby(const HAZAMA::RECT &Rect)
 	return return_bool;
 }
 
-void CZetsubouTask::CreatNewZetsu(void)
+void ZetsubouTask::CreatNewZetsu(void)
 {
 	Dix::sp<Zetsubou> sp_zetsu;
 	if(!p_timer->Exists(timer_id)){		//新規タイマースタート
@@ -345,11 +345,11 @@ void CZetsubouTask::CreatNewZetsu(void)
 	}
 	
 	if(count_min == 0){
-		count_min = GetRand(1000);
+		count_min = HAZAMA::draw_helper->GetRand(1000);
 	}else{
 		if(p_timer->IsTakenUp(timer_id, count_min)){		//ある程度の間を持たせて敵を出す
 
-			CMyFactory<Zetsubou> *p_factory = &CMyFactory<Zetsubou>::Instance();
+			MyFactory<Zetsubou> *p_factory = &MyFactory<Zetsubou>::Instance();
 			if(p_factory->Size() <= MAX_NUM_FOES){
 				OBJID objid = p_factory->Size();
 				p_factory->Create(objid, sp_zetsu);
@@ -361,9 +361,9 @@ void CZetsubouTask::CreatNewZetsu(void)
 	}
 }
 
-bool CSelfBulletTask::Update(void)
+bool SelfBulletTask::Update(void)
 {
-	Dix::sp<CMoveOperator> sp_move_ope;
+	Dix::sp<MoveOperator> sp_move_ope;
 	Dix::sp<SelfBullet> sp_self_bullet;
 	unsigned objid[2] = {0, 0};
 
@@ -372,8 +372,8 @@ bool CSelfBulletTask::Update(void)
 	}
 
 	//全ての種類の弾を処理し終わるまでループを抜けない
-	while(CMyFactory<SelfNormalBullet>::Instance().Exists(sp_self_bullet, objid[0]++)
-		|| CMyFactory<SelfGravifiedBullet>::Instance().Exists(sp_self_bullet, objid[1]++)){ 
+	while(MyFactory<SelfNormalBullet>::Instance().Exists(sp_self_bullet, objid[0]++)
+		|| MyFactory<SelfGravifiedBullet>::Instance().Exists(sp_self_bullet, objid[1]++)){ 
 		
 		//移動に関するオペレーターを動かす
 		for(int i = v_sp_ope.size() - 1; i >= 0; --i){
@@ -392,18 +392,18 @@ bool CSelfBulletTask::Update(void)
 	return true;
 }
 
-bool CFoeBulletTask::Update(void)
+bool FoeBulletTask::Update(void)
 {
-	Dix::sp<CMoveOperator> sp_move_ope;
+	Dix::sp<MoveOperator> sp_move_ope;
 	Dix::sp<FoeBullet> sp_foe_bullet;
 
 	if(!CheckUsageFlag()){
 		return false;	// 使えない
 	}
 
-	for(size_t i = 0; i < CMyFactory<FoeBullet>::Instance().Size(); ++i){ 
+	for(size_t i = 0; i < MyFactory<FoeBullet>::Instance().Size(); ++i){ 
 		
-		CMyFactory<FoeBullet>::Instance().Create(i, sp_foe_bullet);
+		MyFactory<FoeBullet>::Instance().Create(i, sp_foe_bullet);
 		//移動に関するオペレーターを動かす
 		for(int j = v_sp_ope.size() - 1; j >= 0; --j){
 			if(sp_move_ope.DownCast(v_sp_ope[j])){
@@ -423,9 +423,9 @@ bool CFoeBulletTask::Update(void)
 	return true;
 }
 
-bool CItemTask::Update(void)
+bool ItemTask::Update(void)
 {
-	Dix::sp<CMoveOperator> sp_move_ope;
+	Dix::sp<MoveOperator> sp_move_ope;
 	Dix::sp<Items> sp_item;
 	Dix::sp<Snowman> sp_snowman;
 
@@ -433,18 +433,18 @@ bool CItemTask::Update(void)
 		return false;	// 使えない
 	}
 
-	if(!CMyFactory<LifeExtend>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<Barrier>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<Quick>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<Multiplier>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<Eliminator>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<TriBullets>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<GravifiedBullet>::Instance().Exists(sp_item, 0)
-		&& !CMyFactory<EliminatorX>::Instance().Exists(sp_item, 0)){
+	if(!MyFactory<LifeExtend>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<Barrier>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<Quick>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<Multiplier>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<Eliminator>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<TriBullets>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<GravifiedBullet>::Instance().Exists(sp_item, 0)
+		&& !MyFactory<EliminatorX>::Instance().Exists(sp_item, 0)){
 			CreateNewItem();		//アイテムが1個も存在してなかったら、新しく生成する
 	}
 
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
 	
 	if(sp_item != NULL){
 		//移動に関するオペレーターを動かす
@@ -464,8 +464,8 @@ bool CItemTask::Update(void)
 		//EliminatorXの自爆装置起動後の処理を行う
 		Dix::sp<EliminatorX> sp_elimx;
 		if(sp_elimx.DownCast(sp_item) && sp_elimx->IsDestroyed()){
-			Dix::sp<CExploAnim> sp_explo;
-			CMyFactory<CExploAnim>::Instance().Create(0, sp_explo);
+			Dix::sp<ExploAnim> sp_explo;
+			MyFactory<ExploAnim>::Instance().Create(0, sp_explo);
 			HAZAMA::RECT anim_rect = sp_explo->GetRect();
 			HAZAMA::VECTOR2 anim_pos = sp_elimx->GetPosition() - HAZAMA::V2Get(anim_rect.right / 2, anim_rect.down / 2);
 			sp_explo->SetPosition(anim_pos);		//爆発アニメの再生位置をアイテムの現在位置に設定
@@ -477,17 +477,17 @@ bool CItemTask::Update(void)
 	return true;
 }
 
-void CItemTask::CreateNewItem(void)
+void ItemTask::CreateNewItem(void)
 {
-	bool (CItemTask::*func_tbl[NUM_ITEM_TYPES]) (void) = {				//関数ポインタテーブルの作成
-		&CItemTask::CreateLifeEx,
-		&CItemTask::CreateBarrier,
-		&CItemTask::CreateQuick,
-		&CItemTask::CreateMultiplier,
-		&CItemTask::CreateEliminator,
-		&CItemTask::CreateTriBullets,
-		&CItemTask::CreateGravifiedBullet,
-		&CItemTask::CreateEliminatorX
+	bool (ItemTask::*func_tbl[NUM_ITEM_TYPES]) (void) = {				//関数ポインタテーブルの作成
+		&ItemTask::CreateLifeEx,
+		&ItemTask::CreateBarrier,
+		&ItemTask::CreateQuick,
+		&ItemTask::CreateMultiplier,
+		&ItemTask::CreateEliminator,
+		&ItemTask::CreateTriBullets,
+		&ItemTask::CreateGravifiedBullet,
+		&ItemTask::CreateEliminatorX
 	};
 
 	int type;
@@ -497,7 +497,7 @@ void CItemTask::CreateNewItem(void)
 	}
 
 	if(p_timer->IsTakenUp(timer_id, next_count)){
-		next_count = GetRand(10000) + 20000;
+		next_count = HAZAMA::draw_helper->GetRand(10000) + 20000;
 		cur_score = Score::Instance().GetCurScore();
 
 #ifndef _DEBUG
@@ -507,14 +507,14 @@ void CItemTask::CreateNewItem(void)
 #endif
 
 		do{
-			type = GetRand(NUM_ITEM_TYPES - 1);			/*何らかのアイテムが生成されるまで
+			type = HAZAMA::draw_helper->GetRand(NUM_ITEM_TYPES - 1);			/*何らかのアイテムが生成されるまで
 											生成する種類を変えていく*/
 		}while(!(this->*func_tbl[type])() );
 		timer_id = 0;
 	}
 }
 
-bool CTouchTask::Update(void)
+bool TouchTask::Update(void)
 {
 	if(!CheckUsageFlag()){
 		return false;	// 使えない
@@ -529,22 +529,22 @@ bool CTouchTask::Update(void)
 	return true;
 }
 
-void CTouchTask::SelfBulletAndFoe(void)
+void TouchTask::SelfBulletAndFoe(void)
 {
 	Dix::sp<Zetsubou> sp_zetsu;
 	Dix::sp<SelfBullet> sp_self_bullet;
 
-	for(unsigned i = 0; i < CMyFactory<Zetsubou>::Instance().Size(); ++i){
+	for(unsigned i = 0; i < MyFactory<Zetsubou>::Instance().Size(); ++i){
 		
-		CMyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
+		MyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
 		if(sp_zetsu->IsNotDrawn()){
 			continue;		//画面に描画されないZetsubouはスキップする
 		}
 
 		unsigned objid[2] = {0, 0};
 
-		while(CMyFactory<SelfNormalBullet>::Instance().Exists(sp_self_bullet, objid[0]++)
-			|| CMyFactory<SelfGravifiedBullet>::Instance().Exists(sp_self_bullet, objid[1]++)){
+		while(MyFactory<SelfNormalBullet>::Instance().Exists(sp_self_bullet, objid[0]++)
+			|| MyFactory<SelfGravifiedBullet>::Instance().Exists(sp_self_bullet, objid[1]++)){
 
 			if(sp_zetsu->Dispatch(sp_self_bullet.GetPtr())){
 				sp_self_bullet->Dispatch(sp_zetsu.GetPtr());
@@ -554,21 +554,21 @@ void CTouchTask::SelfBulletAndFoe(void)
 	}
 }
 
-void CTouchTask::SelfAndFoe(void)
+void TouchTask::SelfAndFoe(void)
 {
 	Dix::sp<Zetsubou> sp_zetsu;
 
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
-	for(unsigned i = 0; i < CMyFactory<Zetsubou>::Instance().Size(); ++i){
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	for(unsigned i = 0; i < MyFactory<Zetsubou>::Instance().Size(); ++i){
 
-		CMyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);		//ZetsubouとSnowmanの当たり判定
+		MyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);		//ZetsubouとSnowmanの当たり判定
 		if(sp_zetsu->IsNotDrawn()){
 			continue;		//画面に描画されないZetsubouはスキップする
 		}
 
 		if(sp_zetsu->Dispatch(sp_snowman.GetPtr()) && sp_snowman->Dispatch(sp_zetsu.GetPtr())){
-			Dix::sp<CSelfGotHitAnim> sp_self_got_hit;
-			CMyFactory<CSelfGotHitAnim>::Instance().Create(0, sp_self_got_hit);
+			Dix::sp<SelfGotHitAnim> sp_self_got_hit;
+			MyFactory<SelfGotHitAnim>::Instance().Create(0, sp_self_got_hit);
 			sp_self_got_hit->SetPosition(sp_snowman->GetPosition());
 			sp_snowman->Initialize();
 			message = DONT_MOVE;
@@ -577,19 +577,19 @@ void CTouchTask::SelfAndFoe(void)
 	}
 }
 
-void CTouchTask::SelfAndFoeBullet(void)
+void TouchTask::SelfAndFoeBullet(void)
 {
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
-	for(unsigned i = 0; i < CMyFactory<FoeBullet>::Instance().Size(); ++i){
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	for(unsigned i = 0; i < MyFactory<FoeBullet>::Instance().Size(); ++i){
 
-		CMyFactory<FoeBullet>::Instance().Create(i, sp_foe_bullet);		//FoeBulletとSnowmanの当たり判定
+		MyFactory<FoeBullet>::Instance().Create(i, sp_foe_bullet);		//FoeBulletとSnowmanの当たり判定
 		if(sp_foe_bullet->IsNotDrawn()){
 			continue;		//画面に描画されないFoeBulletはスキップする
 		}
 
 		if(sp_foe_bullet->Dispatch(sp_snowman.GetPtr()) && sp_snowman->Dispatch(sp_foe_bullet.GetPtr())){
-			Dix::sp<CSelfGotHitAnim> sp_self_got_hit;
-			CMyFactory<CSelfGotHitAnim>::Instance().Create(0, sp_self_got_hit);
+			Dix::sp<SelfGotHitAnim> sp_self_got_hit;
+			MyFactory<SelfGotHitAnim>::Instance().Create(0, sp_self_got_hit);
 			sp_self_got_hit->SetPosition(sp_snowman->GetPosition());
 			sp_snowman->Initialize();
 			message = DONT_MOVE;
@@ -598,18 +598,18 @@ void CTouchTask::SelfAndFoeBullet(void)
 	}
 }
 
-void CTouchTask::SelfAndItem(void)
+void TouchTask::SelfAndItem(void)
 {
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
 
-	if(!CMyFactory<LifeExtend>::Instance().HaveObj()
-		&& !CMyFactory<Barrier>::Instance().HaveObj()
-		&& !CMyFactory<Quick>::Instance().HaveObj()
-		&& !CMyFactory<Multiplier>::Instance().HaveObj()
-		&& !CMyFactory<Eliminator>::Instance().HaveObj()
-		&& !CMyFactory<TriBullets>::Instance().HaveObj()
-		&& !CMyFactory<GravifiedBullet>::Instance().HaveObj()
-		&& !CMyFactory<EliminatorX>::Instance().HaveObj()){
+	if(!MyFactory<LifeExtend>::Instance().HaveObj()
+		&& !MyFactory<Barrier>::Instance().HaveObj()
+		&& !MyFactory<Quick>::Instance().HaveObj()
+		&& !MyFactory<Multiplier>::Instance().HaveObj()
+		&& !MyFactory<Eliminator>::Instance().HaveObj()
+		&& !MyFactory<TriBullets>::Instance().HaveObj()
+		&& !MyFactory<GravifiedBullet>::Instance().HaveObj()
+		&& !MyFactory<EliminatorX>::Instance().HaveObj()){
 			return;			//アイテムが存在してないなら、当たり判定を取らない
 	}
 
@@ -617,8 +617,8 @@ void CTouchTask::SelfAndItem(void)
 
 		GotItemSE::Play();		//アイテム獲得の効果音を鳴らす
 		if(typeid(*sp_item) == typeid(Eliminator) || typeid(*sp_item) == typeid(EliminatorX)){
-			Dix::sp<CFireAnim> sp_fire_anim;
-			CMyFactory<CFireAnim>::Instance().Create(0, sp_fire_anim);
+			Dix::sp<FireAnim> sp_fire_anim;
+			MyFactory<FireAnim>::Instance().Create(0, sp_fire_anim);
 			if(typeid(*sp_item) == typeid(EliminatorX)){
 				sp_fire_anim->SetSEType(true);
 			}else{
@@ -629,29 +629,29 @@ void CTouchTask::SelfAndItem(void)
 	}
 }
 
-void CTouchTask::Others(void)
+void TouchTask::Others(void)
 {
 	Dix::sp<Zetsubou> sp_zetsu;
-	Dix::sp<CExploAnim> sp_explo;
-	if(!CMyFactory<CExploAnim>::Instance().HaveObj()){	//爆発のアニメーションが存在しないなら、処理を行わない
+	Dix::sp<ExploAnim> sp_explo;
+	if(!MyFactory<ExploAnim>::Instance().HaveObj()){	//爆発のアニメーションが存在しないなら、処理を行わない
 		return;
 	}
 
-	CMyFactory<CExploAnim>::Instance().Create(0, sp_explo);
-	CMyFactory<Snowman>::Instance().Create(0, sp_snowman);
+	MyFactory<ExploAnim>::Instance().Create(0, sp_explo);
+	MyFactory<Snowman>::Instance().Create(0, sp_snowman);
 
 	if(sp_explo->Dispatch(sp_snowman.GetPtr())){
 		sp_snowman->Dispatch(sp_explo.GetPtr());
-		Dix::sp<CSelfGotHitAnim> sp_self_got_hit;
-		CMyFactory<CSelfGotHitAnim>::Instance().Create(0, sp_self_got_hit);
+		Dix::sp<SelfGotHitAnim> sp_self_got_hit;
+		MyFactory<SelfGotHitAnim>::Instance().Create(0, sp_self_got_hit);
 		sp_self_got_hit->SetPosition(sp_snowman->GetPosition());
 		sp_snowman->Initialize();
 		message = DONT_MOVE;
 	}
 
-	for(unsigned i = 0; i < CMyFactory<Zetsubou>::Instance().Size(); ++i){
+	for(unsigned i = 0; i < MyFactory<Zetsubou>::Instance().Size(); ++i){
 
-		CMyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
+		MyFactory<Zetsubou>::Instance().Create(i, sp_zetsu);
 		if(sp_zetsu->IsNotDrawn()){
 			continue;		//画面に描画されないZetsubouはスキップする
 		}
@@ -662,7 +662,7 @@ void CTouchTask::Others(void)
 	}
 }
 
-bool CScoreTask::Update(void)
+bool ScoreTask::Update(void)
 {
 	if(!CheckUsageFlag()){
 		return false;	// 使えない
@@ -672,27 +672,27 @@ bool CScoreTask::Update(void)
 	return true;
 }
 
-CReplayTask::CReplayTask(CInputDeviceKeyBoard *p_key) : replay_flag(false), o_file(), i_file(), sp_iarchive()
+/*ReplayTask::ReplayTask(InputDeviceKeyBoard *p_key) : replay_flag(false), o_file(), i_file(), sp_iarchive()
 , sp_oarchive(), p_keyboard(p_key)
 {}
 
-bool CReplayTask::Update(void)
+bool ReplayTask::Update(void)
 {
 	if(!CheckUsageFlag()){
 		return false;	// 使えない
 	}
 
 	if(!replay_flag){		//リプレイデータをファイルに出力
-		*sp_oarchive << (const CTimerForGames&)CTimerForGames::Instance();
-		*sp_oarchive << (const CInputDeviceKeyBoard&)p_keyboard;
+		*sp_oarchive << (const TimerForGames&)TimerForGames::Instance();
+		*sp_oarchive << (const InputDeviceKeyBoard&)p_keyboard;
 	}else{					//リプレイデータをファイルから入力
-		*sp_iarchive >> CTimerForGames::Instance();
+		*sp_iarchive >> TimerForGames::Instance();
 		*sp_iarchive >> p_keyboard;
 	}
 	return true;
 }
 
-void CReplayTask::SetRecordingFile(const char src[])
+void ReplayTask::SetRecordingFile(const char src[])
 {
 	if(!replay_flag){
 		o_file.open(src);
@@ -705,4 +705,4 @@ void CReplayTask::SetRecordingFile(const char src[])
 		Dix::sp<boost::archive::text_iarchive> tmp(new boost::archive::text_iarchive(i_file));
 		sp_iarchive = tmp;
 	}
-}
+}*/

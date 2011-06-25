@@ -5,9 +5,9 @@
 
 
 
-std::vector<Dix::sp<anim_handle> > CAnimObj::v_sp_anim;		//静的メンバ変数の実体
+std::vector<Dix::sp<anim_handle> > AnimObj::v_sp_anim;		//静的メンバ変数の実体
 
-void CAnimObj::LoadPic(void)
+void AnimObj::LoadPic(void)
 {
 	const char SELF_GOT_HIT_ANIM_NAME[] = "Data\\Images\\self_got_hit_anim.bmp";
 	const char EXPLOSION_ANIM_NAME[] = "Data\\Images\\Explosion.bmp";
@@ -17,9 +17,9 @@ void CAnimObj::LoadPic(void)
 	Dix::sp<anim_handle> self_got_hit(new anim_handle[8], true), fire(new anim_handle[64], true)
 		, explo(new anim_handle[16], true), max_frames(new anim_handle[MAX_FRAMES], true);
 	
-	LoadDivGraph(SELF_GOT_HIT_ANIM_NAME, 8, 4, 2, SELF_PIC_WIDTH, SELF_PIC_HEIGHT, self_got_hit.GetPtr());
-	LoadDivGraph(FIRE_ANIM_NAME, 64, 8, 8, 80, 80, fire.GetPtr());
-	LoadDivGraph(EXPLOSION_ANIM_NAME, 16, 5, 4, 120, 120, explo.GetPtr());
+	HAZAMA::draw_helper->LoadDividedImage(SELF_GOT_HIT_ANIM_NAME, 8, 4, 2, SELF_PIC_WIDTH, SELF_PIC_HEIGHT, self_got_hit.GetPtr());
+	HAZAMA::draw_helper->LoadDividedImage(FIRE_ANIM_NAME, 64, 8, 8, 80, 80, fire.GetPtr());
+	HAZAMA::draw_helper->LoadDividedImage(EXPLOSION_ANIM_NAME, 16, 5, 4, 120, 120, explo.GetPtr());
 
 	max_frames[0] = 8;
 	max_frames[1] = 64;
@@ -31,12 +31,12 @@ void CAnimObj::LoadPic(void)
 	v_sp_anim.push_back(max_frames);
 }
 
-CSelfGotHitAnim::CSelfGotHitAnim(void) : CAnimObj(1)
+SelfGotHitAnim::SelfGotHitAnim(void) : AnimObj(1)
 {
 	rect(0, 0, 96.0f, 96.0f);
 }
 
-bool CSelfGotHitAnim::Draw(void)
+bool SelfGotHitAnim::Draw(void)
 {
 	Dix::sp<anim_handle> sp_tmp(v_sp_anim[SELF_GOT_HIT]);
 	anim_handle *p_anim = &sp_tmp[0];
@@ -44,13 +44,13 @@ bool CSelfGotHitAnim::Draw(void)
 	SelfGotHitSE::Play(pos.x);		//やられたときの効果音を鳴らす
 
 	for(int i = 0; i < 8; ++i){
-		SetDrawScreen(DX_SCREEN_BACK);
-		ClearDrawScreen();
-		DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_anim, true);
+		HAZAMA::draw_helper->SetDrawScreen(HAZAMA::DrawHelper::BACK);
+		HAZAMA::draw_helper->InitializeScreen();
+		HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_anim, true);
 		++p_anim;
-		ScreenFlip();
-		WaitTimer(100);
-		if(ProcessMessage() == -1){
+		HAZAMA::draw_helper->FlipScreen();
+		HAZAMA::draw_helper->WaitTimer(100);
+		if(!HAZAMA::draw_helper->ProcessMessage()){
 			return true;
 		}
 	}
@@ -58,13 +58,13 @@ bool CSelfGotHitAnim::Draw(void)
 	return false;
 }
 
-CFireAnim::CFireAnim(void) : CCooperativeAnimObj(5), play_elimx_SE_flag(false)
+FireAnim::FireAnim(void) : CooperativeAnimObj(5), play_elimx_SE_flag(false)
 {
 	rect(0, 0, 80.0f, 80.0f);
 	SetAnim(FIRE);
 }
 
-bool CFireAnim::Draw(void)
+bool FireAnim::Draw(void)
 {
 	if(cur_frame == 0){			//効果音を鳴らす
 		if(play_elimx_SE_flag){
@@ -84,7 +84,7 @@ bool CFireAnim::Draw(void)
 	return true;
 }
 
-void CFireAnim::DrawAFrame(void)
+void FireAnim::DrawAFrame(void)
 {
 	pos.x = 0, pos.y = 0;
 	anim_handle *p_anim = wp_anim + cur_frame;		//今回描画するフレームの画像を取得
@@ -92,28 +92,28 @@ void CFireAnim::DrawAFrame(void)
 	for(int j = 0; j <= 8; ++j){
 		pos.y = 0;
 		for(int k = 0; k <= 8; ++k){
-			DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_anim, true);
+			HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_anim, true);
 			pos.y += 80;
 		}
 		pos.x += 80;
 	}
 
 	AdvanceFrame();
-	WaitTimer(50 - static_cast<int>(CTimerForGames::Instance().GetCurDiffTime()));	//1コマ50msにするため、不足分待つ
+	HAZAMA::draw_helper->WaitTimer(50 - static_cast<int>(TimerForGames::Instance().GetCurDiffTime()));	//1コマ50msにするため、不足分待つ
 
-	if(ProcessMessage() == -1){
+	if(!HAZAMA::draw_helper->ProcessMessage()){
 		return;
 	}
 }
 
-CExploAnim::CExploAnim(void) : CCooperativeAnimObj(4)
+ExploAnim::ExploAnim(void) : CooperativeAnimObj(4)
 {
 	rect(0, 0, 120.0f, 120.0f);
 	touch_rect(0, 0, 120.0f, 120.0f);
 	SetAnim(EXPLOSION);
 }
 
-bool CExploAnim::Draw(void)
+bool ExploAnim::Draw(void)
 {
 	if(cur_frame == 0){
 		ExplosionSE::Play();		//効果音を鳴らす
@@ -128,15 +128,15 @@ bool CExploAnim::Draw(void)
 	return true;
 }
 
-void CExploAnim::DrawAFrame(void)
+void ExploAnim::DrawAFrame(void)
 {
 	anim_handle *p_anim = wp_anim + cur_frame;		//今回描画するフレームの画像を取得
 
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_anim, true);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), *p_anim, true);
 
 	AdvanceFrame();
 
-	if(ProcessMessage() == -1){
+	if(!HAZAMA::draw_helper->ProcessMessage()){
 		return;
 	}
 }

@@ -12,10 +12,10 @@
 * 敵の一種であるZetsubouクラス
 * 敵の中では最弱の存在
 */
-class Zetsubou : public CCharacter, public CMyDrawObj, public CTouchObj
+class Zetsubou : public Character, public MyDrawObj, public TouchObj
 {
 private:
-	float AMOUNT_FOE_MOVE;		//!< @brief 敵が1フレームに動く量
+	double AMOUNT_FOE_MOVE;		//!< @brief 敵が1フレームに動く量
 	int launched_bullets;	//!< @brief 連続で発射した弾の数
 
 	/**
@@ -31,7 +31,7 @@ private:
 	/**
 	* 実際に判定を取る方
 	*/
-	bool Touch(CExploAnim *other);
+	bool Touch(ExploAnim *other);
 
 public:
 
@@ -45,7 +45,7 @@ public:
 	*/
 	bool Draw(void);
 
-	bool Dispatch(CTouchObj *other){
+	bool Dispatch(TouchObj *other){
 		return(other->Touch(this));
 	}
 

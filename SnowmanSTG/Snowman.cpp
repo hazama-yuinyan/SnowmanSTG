@@ -7,12 +7,12 @@
 #include "AnimObj.h"
 
 
-Snowman::Snowman() : CMyDrawObj(1), AMOUNT_SELF_MOVE(300.0f), barrier_flag(false), LIFE_PIC_WIDTH(24), life(3)
+Snowman::Snowman() : MyDrawObj(1), AMOUNT_SELF_MOVE(300.0), barrier_flag(false), LIFE_PIC_WIDTH(24), life(3)
 , bullet_type(BULLET_NORMAL)
 {
 	Initialize();
-	rect(0, 0, 96.0f, 96.0f);
-	touch_rect(20.0f, 16.0f, 86.0f, 80.0f);
+	rect(0, 0, 96.0, 96.0);
+	touch_rect(20.0, 16.0, 86.0, 80.0);
 }
 
 void Snowman::Initialize(void)
@@ -43,8 +43,8 @@ bool Snowman::Draw(void)
 		SetPosition(LOWER_EDGE_POSITION - rect.down, 1);
 	}
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SNOWMAN], true);
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SNOWMAN], true);
 
 	LifeDraw();
 
@@ -83,7 +83,7 @@ bool Snowman::Touch(FoeBullet *other)
 	}
 }
 
-bool Snowman::Touch(CExploAnim *other)
+bool Snowman::Touch(ExploAnim *other)
 {
 	HAZAMA::RECT other_rect = other->GetTouchRect() + other->GetPosition();
 	if(IsTouchRectAndRect(touch_rect + pos, other_rect)){
@@ -96,10 +96,10 @@ bool Snowman::Touch(CExploAnim *other)
 void Snowman::LifeDraw(void)
 {
 	int i, x;
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-	x = RIGHT_EDGE_POSITION - life * LIFE_PIC_WIDTH;
+	HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::NO_BLEND, 0);
+	x = static_cast<int>(RIGHT_EDGE_POSITION) - life * LIFE_PIC_WIDTH;
 	for(i = 0; i < life; ++i){
-		DrawGraph(x, 0, pic_handles[LIFE], true);
+		HAZAMA::draw_helper->DrawImage(x, 0, pic_handles[LIFE], true);
 		x += LIFE_PIC_WIDTH;
 	}
 }
@@ -107,7 +107,7 @@ void Snowman::LifeDraw(void)
 void Snowman::BarrierOn(void)
 {
 	barrier_flag= true;
-	barrier_off_time = GetNowCount() + 10 * 1000;
+	barrier_off_time = static_cast<int>(TimerForGames::Instance().GetTotalTime()) + 10 * 1000;
 }
 
 void Snowman::BarrierOff(bool IsCompelled)
@@ -115,7 +115,7 @@ void Snowman::BarrierOff(bool IsCompelled)
 	if(IsCompelled){
 		barrier_flag = false;
 	}else{
-		int now = GetNowCount();
+		int now = static_cast<int>(TimerForGames::Instance().GetTotalTime());
 
 		if(now >= barrier_off_time){
 			barrier_flag = false;
@@ -125,25 +125,25 @@ void Snowman::BarrierOff(bool IsCompelled)
 
 void Snowman::BarrierDraw(void)
 {
-	int remaining_time = barrier_off_time - GetNowCount(), a;
+	int remaining_time = barrier_off_time - static_cast<int>(TimerForGames::Instance().GetTotalTime()), a;
 
 	if((remaining_time <= 3000) && (remaining_time >= 1000)){	//バリアーの持続時間が残り3秒を切ったら点滅させる
 		if(remaining_time % 200 >= 100){
 			a = 0;
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, a);
+			HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::ALPHA, a);
 		}else{
-			SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
+			HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::ADD, 128);
 		}
 	}else if(remaining_time <= 1000){
 		if(remaining_time % 100 >= 50){
 			a = 0;
-			SetDrawBlendMode(DX_BLENDMODE_ALPHA, a);
+			HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::ALPHA, a);
 		}else{
-			SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
+			HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::ADD, 128);
 		}
 	}else{
-		SetDrawBlendMode(DX_BLENDMODE_ADD, 128);
+		HAZAMA::draw_helper->SetDrawBlendMode(HAZAMA::DrawHelper::ADD, 128);
 	}
 		
-	DrawGraph(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SNOW_BARRIER], true);
+	HAZAMA::draw_helper->DrawImage(static_cast<int>(pos.x), static_cast<int>(pos.y), pic_handles[SNOW_BARRIER], true);
 }

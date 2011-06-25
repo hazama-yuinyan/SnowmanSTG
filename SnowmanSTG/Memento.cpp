@@ -1,20 +1,20 @@
 #include "stdafx.h"
 #include "Memento.h"
 
-CMementoKey::CMementoKey(void)
+MementoKey::MementoKey(void)
 {
 	key_state.assign(0);
 }
 
-void CMementoKey::SetData(char In[])
+void MementoKey::SetData(char In[])
 {
-	for(int i = 0; i < key_state.size(); ++i){
+	for(unsigned i = 0; i < key_state.size(); ++i){
 		key_state[i] = *In;
 		++In;
 	}
 }
 
-boost::array<char, 256> &CMementoKey::GetData(void)
+boost::array<char, 256> &MementoKey::GetData(void)
 {
 	return key_state;
 }

@@ -14,7 +14,7 @@ typedef int anim_handle;
 * 通常アニメーション用の基底クラス
 * 独立したアニメーションの描画にはこのクラスを単独継承して実装する
 */
-class CAnimObj : public CDrawObj
+class AnimObj : public DrawObj
 {
 protected:
 	static std::vector<Dix::sp<anim_handle> > v_sp_anim;
@@ -23,13 +23,13 @@ protected:
 	/**
 	* コンストラクタ（プロテクト宣言）
 	*/
-	CAnimObj(const int PriorityNum) : CDrawObj(PriorityNum){};
+	AnimObj(const int PriorityNum) : DrawObj(PriorityNum){};
 
 public:
 	/**
 	* デコンストラクタ
 	*/
-	~CAnimObj(){};
+	~AnimObj(){};
 
 	/*
 	* 位置を設定する
@@ -72,7 +72,7 @@ public:
 /**
 * ほかのオブジェクトを描画しつつ、同時にアニメーションも再生したい場合にはこのクラスを継承する
 */
-class CCooperativeAnimObj : public CAnimObj
+class CooperativeAnimObj : public AnimObj
 {
 protected:
 	int cur_frame;		//!< @brief 現在のフレーム数
@@ -85,18 +85,18 @@ protected:
 	}
 
 public:
-	CCooperativeAnimObj(const int PriorityNum) : CAnimObj(PriorityNum), cur_frame(0){};
-	virtual ~CCooperativeAnimObj(void){};
+	CooperativeAnimObj(const int PriorityNum) : AnimObj(PriorityNum), cur_frame(0){};
+	virtual ~CooperativeAnimObj(void){};
 	
 	void AdvanceFrame(void){++cur_frame;}
 
 	virtual void DrawAFrame(void) = 0;
 };
 
-class CSelfGotHitAnim : public CAnimObj
+class SelfGotHitAnim : public AnimObj
 {
 public:
-	CSelfGotHitAnim();
+	SelfGotHitAnim();
 
 	/**
 	* 描画関数
@@ -109,14 +109,14 @@ public:
 	void MessageGet(OBJ_MSG &msg){msg = MOVING;}
 };
 
-class CFireAnim : public CCooperativeAnimObj
+class FireAnim : public CooperativeAnimObj
 {
 private:
 	bool play_elimx_SE_flag;
 
 public:
-	CFireAnim(void);
-	virtual ~CFireAnim(void){};
+	FireAnim(void);
+	virtual ~FireAnim(void){};
 
 	/**
 	* 描画関数
@@ -134,15 +134,15 @@ public:
 	void SetSEType(bool Flag){play_elimx_SE_flag = Flag;}
 };
 
-class CExploAnim : public CCooperativeAnimObj, public CTouchObj
+class ExploAnim : public CooperativeAnimObj, public TouchObj
 {
 private:
 	bool Touch(Snowman *other){return true;}
 	bool Touch(Zetsubou *other){return true;}
 
 public:
-	CExploAnim(void);
-	virtual ~CExploAnim(void){};
+	ExploAnim(void);
+	virtual ~ExploAnim(void){};
 
 	/**
 	* 描画関数
@@ -150,7 +150,7 @@ public:
 	bool Draw(void);
 
 	void DrawAFrame(void);
-	bool Dispatch(CTouchObj *other){
+	bool Dispatch(TouchObj *other){
 		return(other->Touch(this));
 	}
 };

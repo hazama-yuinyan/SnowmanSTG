@@ -8,20 +8,20 @@
 #include "TouchObj.h"
 
 
-class Items : public CMyDrawObj, public CTouchObj, public CCharacter
+class Items : public MyDrawObj, public TouchObj, public Character
 {
 protected:
-	float AMOUNT_ITEM_MOVE;
+	double AMOUNT_ITEM_MOVE;
 
 public:
-	Items() : CMyDrawObj(3){
-		float rand = static_cast<float>(GetRand(MAX_INITIAL_POS_Y));
-		pos(INITIAL_FOE_POSITION, rand);
-		rect(0, 0, 40.0f, 40.0f);
-		touch_rect(0, 0, 40.0f, 40.0f);
+	Items() : MyDrawObj(3){
+		const double RAND = static_cast<double>(HAZAMA::draw_helper->GetRand(MAX_INITIAL_POS_Y));
+		pos(INITIAL_FOE_POSITION, RAND);
+		rect(0, 0, 40.0, 40.0);
+		touch_rect(0, 0, 40.0, 40.0);
 	}
 	virtual ~Items(){};
-	bool Dispatch(CTouchObj *other){
+	bool Dispatch(TouchObj *other){
 		return(other->Touch(this));
 	}
 	virtual bool Touch(Snowman *other){return false;}
@@ -31,9 +31,9 @@ class LifeExtend : public Items
 {
 public:
 	LifeExtend(void){
-		AMOUNT_ITEM_MOVE = 480.0f;
+		AMOUNT_ITEM_MOVE = 480.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -47,9 +47,9 @@ class Barrier : public Items
 {
 public:
 	Barrier(void){
-		AMOUNT_ITEM_MOVE = 660.0f;
+		AMOUNT_ITEM_MOVE = 660.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -63,9 +63,9 @@ class Quick : public Items
 {
 public:
 	Quick(void){
-		AMOUNT_ITEM_MOVE = 720.0f;
+		AMOUNT_ITEM_MOVE = 720.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -79,9 +79,9 @@ class TriBullets : public Items
 {
 public:
 	TriBullets(void){
-		AMOUNT_ITEM_MOVE = 1020.0f;
+		AMOUNT_ITEM_MOVE = 1020.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -95,9 +95,9 @@ class Eliminator : public Items
 {
 public:
 	Eliminator(void){
-		AMOUNT_ITEM_MOVE = 834.0f;
+		AMOUNT_ITEM_MOVE = 834.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -111,9 +111,9 @@ class Multiplier : public Items
 {
 public:
 	Multiplier(void){
-		AMOUNT_ITEM_MOVE = 780.0f;
+		AMOUNT_ITEM_MOVE = 780.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -127,9 +127,9 @@ class GravifiedBullet : public Items
 {
 public:
 	GravifiedBullet(void){
-		AMOUNT_ITEM_MOVE = 700.0f;
+		AMOUNT_ITEM_MOVE = 700.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 	}
 	bool Draw(void);
 
@@ -148,9 +148,9 @@ private:
 
 public:
 	EliminatorX(void) : destruct_flag(false), count_start(0){
-		AMOUNT_ITEM_MOVE = 450.0f;
+		AMOUNT_ITEM_MOVE = 450.0;
 		speed = AMOUNT_ITEM_MOVE;
-		vect(-1.0f * speed, 0);
+		vect(-1.0 * speed, 0);
 		p_pic_handle = &pic_handles[ITEM_ELIMINATOR_X1];
 	}
 	bool Draw(void);
@@ -166,7 +166,7 @@ public:
 	*/
 	bool IsDestroyed(void){
 		if(destruct_flag){
-			return(GetNowCount() - count_start >= 3000);
+			return(static_cast<int>(TimerForGames::Instance().GetTotalTime()) - count_start >= 3000);
 		}
 		return false;
 	}

@@ -9,19 +9,19 @@
 /**
 * キャラクター全部の基本クラス
 */
-class CCharacter
+class Character
 {
 protected:
 	HAZAMA::VECTOR2 pos;			//!< @brief キャラクターの位置（位置ベクトル）
 	HAZAMA::VECTOR2 vect;		//!< @brief キャラクターの動く速度
-	float speed;		//!< @brief キャラクターの移動速度(単位はpixels/s)
+	double speed;		//!< @brief キャラクターの移動速度(単位はpixels/s)
 
 public:
 
 	/**
 	* コンストラクタ 位置や速度にとりあえず0を入れておく
 	*/
-	CCharacter(){};
+	Character(){};
 	
 	/*
 	* 位置を設定する
@@ -36,7 +36,7 @@ public:
 	* @param Pos 設定する値
 	* @param Ax 設定する軸（x=0, y=1)
 	*/
-	void SetPosition(const float Pos, const int Ax){
+	void SetPosition(const double Pos, const int Ax){
 		switch(Ax){
 			case 0:
 				pos.x = Pos;
@@ -60,7 +60,7 @@ public:
 	* @param V 設定する値
 	* @param Ax 設定する軸（x=0, y=1)
 	*/
-	void SetVector(const float V, const int Ax){
+	void SetVector(const double V, const int Ax){
 		switch(Ax){
 			case 0:
 				vect.x = V;
@@ -71,7 +71,7 @@ public:
 		}
 	}
 
-	void SetSpeed(const float Speed){
+	void SetSpeed(const double Speed){
 		speed = Speed;
 	}
 
@@ -87,7 +87,7 @@ public:
 	*/
 	const HAZAMA::VECTOR2& GetVector(void) const{return vect;}
 
-	const float &GetSpeed(void) const{return speed;}
+	const double &GetSpeed(void) const{return speed;}
 };
 
 
@@ -96,10 +96,10 @@ enum BULLETTYPE{BULLET_NORMAL, TRIBULLETS, GRAVIFIED};
 /**
 * プレイヤーが操作するキャラクタークラス
 */
-class Snowman : public CCharacter, public CMyDrawObj, public CTouchObj
+class Snowman : public Character, public MyDrawObj, public TouchObj
 {
 private:
-	const float AMOUNT_SELF_MOVE;
+	const double AMOUNT_SELF_MOVE;
 	const int LIFE_PIC_WIDTH;
 	int life;		  ///< @brief 残機数
 	int barrier_off_time;	//!< @brief バリアーがオフになる時間を記録しておく変数
@@ -125,7 +125,7 @@ private:
 	/**
 	* 実際に判定を取る方
 	*/
-	bool Touch(CExploAnim *other);
+	bool Touch(ExploAnim *other);
 	
 public:
 	Snowman();
@@ -135,7 +135,7 @@ public:
 	* 残機数が0になったので、ゲームを終了するよう指示を出す
 	*/
 	void MessageGet(OBJ_MSG &msg){msg = GAMES_OVER;}
-	bool Dispatch(CTouchObj *other){
+	bool Dispatch(TouchObj *other){
 		return(other->Touch(this));
 	}
 

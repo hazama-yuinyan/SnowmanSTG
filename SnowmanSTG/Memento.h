@@ -2,16 +2,16 @@
 
 #include "stdafx.h"
 
-class CMementoKey
+class MementoKey
 {
-	friend class CInputDeviceKeyBoard;
+	friend class InputDeviceKeyBoard;
 
 private:
-	CMementoKey(void);
+	MementoKey(void);
 	boost::array<char, 256> key_state;
 	void SetData(char In[]);
 	boost::array<char, 256> &GetData(void);
 
 public:
-	~CMementoKey(void){};
+	~MementoKey(void){};
 };
